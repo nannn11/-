@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Star Blaster</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="stage">
+    <canvas id="game" width="480" height="720"></canvas>
+
+    <div id="hud">
+      <div class="hud-item">SCORE<br><span id="score">0</span></div>
+      <div class="hud-item">LEVEL<br><span id="level">1</span></div>
+      <div class="hud-item">LIVES<br><span id="lives">▲▲▲</span></div>
+      <div class="hud-item">HI-SCORE<br><span id="highScore">0</span></div>
+    </div>
+
+    <button id="muteBtn" aria-label="Mute">🔊</button>
+
+    <div id="startScreen" class="overlay">
+      <h1>STAR BLASTER</h1>
+      <p class="subtitle">คลื่นเอเลี่ยนกำลังบุก ปกป้องโลกของคุณ!</p>
+      <div class="instructions">
+        <p>⬅️➡️ / A D — เคลื่อนที่</p>
+        <p>SPACE / ⬆️ — ยิง</p>
+        <p>P — หยุดชั่วคราว</p>
+      </div>
+      <button id="startBtn" class="btn">เริ่มเกม</button>
+    </div>
+
+    <div id="pauseScreen" class="overlay hidden">
+      <h1>PAUSED</h1>
+      <button id="resumeBtn" class="btn">เล่นต่อ</button>
+    </div>
+
+    <div id="gameOverScreen" class="overlay hidden">
+      <h1>GAME OVER</h1>
+      <p class="subtitle">คะแนนของคุณ: <span id="finalScore">0</span></p>
+      <p class="subtitle" id="newHighScore" class="hidden">🏆 สถิติใหม่!</p>
+      <button id="restartBtn" class="btn">เล่นอีกครั้ง</button>
+    </div>
+
+    <div id="levelUpBanner" class="banner hidden">LEVEL <span id="levelUpNum">2</span></div>
+
+    <div id="touchControls">
+      <button id="btnLeft" class="touch-btn" aria-label="Left">◀</button>
+      <button id="btnFire" class="touch-btn touch-fire" aria-label="Fire">●</button>
+      <button id="btnRight" class="touch-btn" aria-label="Right">▶</button>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
