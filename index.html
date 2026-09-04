@@ -2,55 +2,62 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Star Blaster</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>โลกดนตรีสากล — เรียนรู้เครื่องดนตรีสากล</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="stage">
-    <canvas id="game" width="480" height="720"></canvas>
-
-    <div id="hud">
-      <div class="hud-item">SCORE<br><span id="score">0</span></div>
-      <div class="hud-item">LEVEL<br><span id="level">1</span></div>
-      <div class="hud-item">LIVES<br><span id="lives">▲▲▲</span></div>
-      <div class="hud-item">HI-SCORE<br><span id="highScore">0</span></div>
-    </div>
-
-    <button id="muteBtn" aria-label="Mute">🔊</button>
-
-    <div id="startScreen" class="overlay">
-      <h1>STAR BLASTER</h1>
-      <p class="subtitle">คลื่นเอเลี่ยนกำลังบุก ปกป้องโลกของคุณ!</p>
-      <div class="instructions">
-        <p>⬅️➡️ / A D — เคลื่อนที่</p>
-        <p>SPACE / ⬆️ — ยิง</p>
-        <p>P — หยุดชั่วคราว</p>
-      </div>
-      <button id="startBtn" class="btn">เริ่มเกม</button>
-    </div>
-
-    <div id="pauseScreen" class="overlay hidden">
-      <h1>PAUSED</h1>
-      <button id="resumeBtn" class="btn">เล่นต่อ</button>
-    </div>
-
-    <div id="gameOverScreen" class="overlay hidden">
-      <h1>GAME OVER</h1>
-      <p class="subtitle">คะแนนของคุณ: <span id="finalScore">0</span></p>
-      <p class="subtitle" id="newHighScore" class="hidden">🏆 สถิติใหม่!</p>
-      <button id="restartBtn" class="btn">เล่นอีกครั้ง</button>
-    </div>
-
-    <div id="levelUpBanner" class="banner hidden">LEVEL <span id="levelUpNum">2</span></div>
-
-    <div id="touchControls">
-      <button id="btnLeft" class="touch-btn" aria-label="Left">◀</button>
-      <button id="btnFire" class="touch-btn touch-fire" aria-label="Fire">●</button>
-      <button id="btnRight" class="touch-btn" aria-label="Right">▶</button>
-    </div>
+<header class="site-nav">
+  <div class="wrap">
+    <a href="index.html" class="brand">โลกดนตรี<span>สากล</span></a>
+    <nav class="families">
+      <a href="strings.html">เครื่องสาย</a>
+      <a href="woodwinds.html">เครื่องเป่าลมไม้</a>
+      <a href="brass.html">เครื่องทองเหลือง</a>
+      <a href="percussion.html">เครื่องกระทบ</a>
+      <a href="keyboard.html">เครื่องคีย์บอร์ด</a>
+      <a href="gallery.html">วิดีโอตัวอย่าง</a>
+    </nav>
   </div>
-
-  <script src="game.js"></script>
+</header>
+<main class="wrap">
+  <section class="hero">
+    <div class="eyebrow">คู่มือเครื่องดนตรีสากล</div>
+    <h1>เรียนรู้เครื่องดนตรี<br>สากลทั้ง 5 ตระกูล</h1>
+    <p class="lead">สำรวจที่มา วิธีกำเนิดเสียง และเกร็ดความรู้ของเครื่องดนตรีสากลยอดนิยม จัดหมวดหมู่ตามตระกูล ตั้งแต่เครื่องสาย เครื่องเป่าลมไม้ เครื่องทองเหลือง เครื่องกระทบ ไปจนถึงเครื่องคีย์บอร์ด</p>
+  </section>
+  <section class="family-grid">
+      <a class="family-card" href="strings.html" style="--fam:var(--c-strings)">
+        <div class="th">เครื่องสาย</div>
+        <div class="en">Strings</div>
+        <p class="desc">เสียงที่เกิดจากการสั่นของสายด้วยคันชักหรือการดีด</p>
+      </a>
+      <a class="family-card" href="woodwinds.html" style="--fam:var(--c-woodwinds)">
+        <div class="th">เครื่องเป่าลมไม้</div>
+        <div class="en">Woodwinds</div>
+        <p class="desc">เสียงจากลมที่ผ่านลิ้นหรือขอบรูเป่า ควบคุมระดับเสียงด้วยการปิดเปิดรู</p>
+      </a>
+      <a class="family-card" href="brass.html" style="--fam:var(--c-brass)">
+        <div class="th">เครื่องทองเหลือง</div>
+        <div class="en">Brass</div>
+        <p class="desc">เสียงจากการสั่นของริมฝีปากผู้เล่นผ่านปากเป่าทรงกรวย</p>
+      </a>
+      <a class="family-card" href="percussion.html" style="--fam:var(--c-percussion)">
+        <div class="th">เครื่องกระทบ</div>
+        <div class="en">Percussion</div>
+        <p class="desc">เสียงจากการตี เขย่า หรือกระทบพื้นผิวของตัวเครื่อง</p>
+      </a>
+      <a class="family-card" href="keyboard.html" style="--fam:var(--c-keyboard)">
+        <div class="th">เครื่องคีย์บอร์ด</div>
+        <div class="en">Keyboard</div>
+        <p class="desc">เสียงที่ควบคุมผ่านแป้นคีย์ ไม่ว่าจะสร้างเสียงด้วยสาย ลม หรือวงจรไฟฟ้า</p>
+      </a>
+  </section>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p>โลกดนตรีสากล — เว็บไซต์เรียนรู้เครื่องดนตรีสากล 5 ตระกูล จัดทำเพื่อการศึกษา</p>
+  </div>
+</footer>
 </body>
 </html>
