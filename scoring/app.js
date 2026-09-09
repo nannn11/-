@@ -138,6 +138,14 @@
     });
   }
 
+  function scorePillClass(total, max) {
+    if (max <= 0) return '';
+    const ratio = total / max;
+    if (ratio < 0.4) return 'low';
+    if (ratio < 0.8) return 'mid';
+    return '';
+  }
+
   function renderClassView() {
     const cls = getClass(currentClassId);
     if (!cls) return;
@@ -158,36 +166,57 @@
     sorted.forEach((student) => {
       const total = studentTotal(student.id);
       const pct = cls.maxScore > 0 ? Math.max(0, Math.min(100, (total / cls.maxScore) * 100)) : 0;
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="col-number">${escapeHtml(student.number)}</td>
-        <td class="col-name">${escapeHtml(student.name)}</td>
-        <td class="col-score">
-          <div class="score-cell">
-            <span>
-              <span class="score-value ${total < 0 ? 'negative' : ''}">${total}</span>
-              <span class="score-max">/ ${cls.maxScore}</span>
-            </span>
-            <div class="score-bar"><div class="score-bar-fill" style="width:${pct}%"></div></div>
-          </div>
-        </td>
-        <td class="col-actions">
-          <button class="btn btn-small btn-primary" data-action="score">ให้คะแนน / ประวัติ</button>
-          <button class="btn-icon" data-action="edit" title="แก้ไขข้อมูล">✏️</button>
-          <button class="btn-icon" data-action="delete" title="ลบนักเรียน">🗑️</button>
-        </td>
+      const pillClass = scorePillClass(total, cls.maxScore);
+      const card = document.createElement('div');
+      card.className = 'student-card';
+      card.innerHTML = `
+        <div class="card-top">
+          <span class="card-number">${escapeHtml(student.number)}</span>
+          <button type="button" class="card-more" title="รายละเอียด/ประวัติ/แก้ไข">⋯</button>
+        </div>
+        <div class="card-name">${escapeHtml(student.name)}</div>
+        <div class="card-score-row">
+          <button type="button" class="card-score-btn minus" data-delta="-1" aria-label="ลบ 1 คะแนน">−</button>
+          <span class="card-score-value ${pillClass}">${total}</span>
+          <button type="button" class="card-score-btn plus" data-delta="1" aria-label="เพิ่ม 1 คะแนน">+</button>
+        </div>
+        <div class="card-bar"><div class="card-bar-fill" style="width:${pct}%"></div></div>
+        <div class="card-of">/ ${cls.maxScore}</div>
       `;
-      tr.querySelector('[data-action="score"]').addEventListener('click', () => openStudentScoreModal(cls.id, student.id));
-      tr.querySelector('[data-action="edit"]').addEventListener('click', () => openEditStudentModal(cls.id, student.id));
-      tr.querySelector('[data-action="delete"]').addEventListener('click', () => deleteStudent(cls.id, student.id));
-      studentRowsEl.appendChild(tr);
+      card.addEventListener('click', () => openStudentScoreModal(cls.id, student.id));
+      card.querySelector('.card-more').addEventListener('click', (e) => {
+        e.stopPropagation();
+        openStudentScoreModal(cls.id, student.id);
+      });
+      card.querySelectorAll('[data-delta]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          quickAdjust(cls.id, student.id, parseFloat(btn.dataset.delta));
+        });
+      });
+      studentRowsEl.appendChild(card);
     });
+  }
+
+  function quickAdjust(classId, studentId, delta) {
+    state.scores.push({
+      id: uid(),
+      classId,
+      studentId,
+      points: delta,
+      reason: '',
+      date: todayStr(),
+      createdAt: Date.now(),
+    });
+    saveState();
+    render();
+    showToast(delta > 0 ? `+${delta} คะแนน` : `${delta} คะแนน`);
   }
 
   // ---------- Modal ----------
   function openModal(title) {
     modalTitle.textContent = title;
-    modal.showModal();
+    if (!modal.open) modal.showModal();
   }
   function closeModal() {
     modal.close();
@@ -342,14 +371,15 @@
 
   function deleteStudent(classId, studentId) {
     const student = getStudent(classId, studentId);
-    if (!student) return;
-    if (!confirm(`ยืนยันลบนักเรียน "${student.name}" พร้อมประวัติคะแนนทั้งหมด?`)) return;
+    if (!student) return false;
+    if (!confirm(`ยืนยันลบนักเรียน "${student.name}" พร้อมประวัติคะแนนทั้งหมด?`)) return false;
     const cls = getClass(classId);
     cls.students = cls.students.filter((s) => s.id !== studentId);
     state.scores = state.scores.filter((s) => s.studentId !== studentId);
     saveState();
     render();
     showToast('ลบนักเรียนแล้ว');
+    return true;
   }
 
   function openImportStudentsModal(classId) {
@@ -427,8 +457,21 @@
     if (!student || !cls) return;
     openModal(`${student.name} (เลขที่ ${student.number})`);
     renderScoreModalBody(classId, studentId);
-    modalFooter.innerHTML = `<button type="button" class="btn btn-ghost" data-close>ปิด</button>`;
+    modalFooter.innerHTML = `
+      <div style="display:flex;gap:8px;margin-right:auto;">
+        <button type="button" class="btn btn-ghost" data-edit>✏️ แก้ไขข้อมูล</button>
+        <button type="button" class="btn btn-danger" data-delete-student>🗑️ ลบนักเรียน</button>
+      </div>
+      <button type="button" class="btn btn-ghost" data-close>ปิด</button>
+    `;
     modalFooter.querySelector('[data-close]').addEventListener('click', closeModal);
+    modalFooter.querySelector('[data-edit]').addEventListener('click', () => {
+      openEditStudentModal(classId, studentId);
+    });
+    modalFooter.querySelector('[data-delete-student]').addEventListener('click', () => {
+      const deleted = deleteStudent(classId, studentId);
+      if (deleted) closeModal();
+    });
     modalForm.onsubmit = (e) => {
       e.preventDefault();
       const pointsInput = document.getElementById('f-points');

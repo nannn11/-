@@ -13,6 +13,7 @@
   --danger-hover: #b0323b;
   --positive: #1f8a52;
   --negative: #d33f49;
+  --gold: #b9812c;
   --shadow: 0 6px 20px rgba(20, 30, 60, 0.08);
   --radius: 12px;
 }
@@ -33,6 +34,7 @@
     --danger-hover: #ff8890;
     --positive: #4fd18b;
     --negative: #ff6b74;
+    --gold: #d9ab52;
     --shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
   }
 }
@@ -229,63 +231,121 @@ main {
   min-width: 180px;
 }
 
-.table-wrap {
-  overflow-x: auto;
+.roster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+  gap: 10px;
 }
 
-.student-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 560px;
-}
-
-.student-table th,
-.student-table td {
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--border);
-  text-align: left;
-  vertical-align: middle;
-}
-
-.student-table th {
-  color: var(--text-muted);
-  font-weight: 600;
-  font-size: 0.85rem;
-}
-
-.col-number { width: 70px; }
-.col-score { width: 220px; }
-.col-actions { width: 220px; white-space: nowrap; }
-
-.score-cell {
+.student-card {
+  position: relative;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px;
+  cursor: pointer;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
+  transition: border-color 0.15s;
 }
+.student-card:hover { border-color: var(--primary); }
 
-.score-value {
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-number {
+  font-variant-numeric: tabular-nums;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  padding: 2px 8px;
+  border-radius: 999px;
 }
-.score-value.negative { color: var(--negative); }
-.score-max { color: var(--text-muted); font-size: 0.78rem; margin-left: 4px; }
+.card-more {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0 4px;
+  border-radius: 6px;
+  line-height: 1;
+}
+.card-more:hover { background: var(--surface-2); color: var(--text); }
 
-.score-bar {
+.card-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1.3;
+  min-height: 2.35em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-score-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.card-score-btn {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--primary);
+  font-size: 1.25rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.card-score-btn:hover { background: var(--secondary); }
+.card-score-btn.minus { color: var(--negative); }
+
+.card-score-value {
+  min-width: 40px;
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--positive);
+}
+.card-score-value.mid { color: var(--gold); }
+.card-score-value.low { color: var(--negative); }
+
+.card-bar {
   width: 100%;
-  height: 6px;
+  height: 5px;
   background: var(--surface-2);
   border-radius: 999px;
   overflow: hidden;
 }
-.score-bar-fill {
+.card-bar-fill {
   height: 100%;
-  background: var(--positive);
   border-radius: 999px;
+  background: var(--positive);
+}
+.card-of {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.72rem;
 }
 
-.col-actions .btn,
-.col-actions .btn-icon {
-  margin-right: 4px;
+.hint {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0 0 12px;
 }
 
 .empty-hint {
@@ -347,6 +407,7 @@ dialog#modal::backdrop {
 
 .modal-footer {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
   padding: 14px 18px;

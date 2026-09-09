@@ -251,50 +251,96 @@
     min-width: 170px;
   }
 
-  .table-wrap { overflow-x: auto; }
-
-  .roster {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 620px;
+  .roster-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+    gap: 10px;
   }
-  .roster th, .roster td {
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--line);
-    text-align: left;
-    vertical-align: middle;
+  .student-card {
+    position: relative;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: border-color 0.15s;
   }
-  .roster th {
-    color: var(--muted);
-    font-weight: 600;
-    font-size: 0.82rem;
-  }
-  .c-num { width: 64px; font-variant-numeric: tabular-nums; }
-  .c-score { width: 230px; }
-  .c-actions { width: 230px; white-space: nowrap; }
-
-  .score-pill-row {
+  .student-card:hover { border-color: var(--accent); }
+  .card-top {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 6px;
+    justify-content: space-between;
   }
-  .score-pill {
+  .card-number {
     font-variant-numeric: tabular-nums;
     font-weight: 700;
-    font-size: 0.86rem;
-    padding: 2px 10px;
+    font-size: 0.76rem;
+    color: var(--muted);
+    background: var(--surface-2);
+    padding: 2px 8px;
     border-radius: 999px;
-    background: var(--positive-soft);
+  }
+  .card-more {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 0 4px;
+    border-radius: 6px;
+    line-height: 1;
+  }
+  .card-more:hover { background: var(--surface-2); color: var(--ink); }
+  .card-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    line-height: 1.3;
+    min-height: 2.35em;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .card-score-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .card-score-btn {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--accent-strong);
+    font-size: 1.25rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+  .card-score-btn:hover { background: var(--accent-soft); }
+  .card-score-btn.minus { color: var(--negative); }
+  .card-score-value {
+    min-width: 40px;
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
     color: var(--positive);
   }
-  .score-pill.mid { background: var(--surface-2); color: var(--gold); }
-  .score-pill.low { background: var(--negative-soft); color: var(--negative); }
-  .score-of { color: var(--muted); font-size: 0.78rem; }
-  .score-bar {
-    width: 100%; height: 5px; background: var(--surface-2); border-radius: 999px; overflow: hidden;
-  }
-  .score-bar-fill { height: 100%; border-radius: 999px; background: var(--gold); }
+  .card-score-value.mid { color: var(--gold); }
+  .card-score-value.low { color: var(--negative); }
+  .card-bar { width: 100%; height: 5px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
+  .card-bar-fill { height: 100%; border-radius: 999px; background: var(--gold); }
+  .card-of { text-align: center; color: var(--muted); font-size: 0.72rem; }
 
   .empty-hint { text-align: center; color: var(--muted); padding: 26px; }
 
@@ -318,7 +364,7 @@
   }
   .modal-header h3 { font-size: 1.02rem; }
   .modal-body { padding: 16px 18px; overflow-y: auto; }
-  .modal-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 18px; border-top: 1px solid var(--line); }
+  .modal-footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; padding: 14px 18px; border-top: 1px solid var(--line); }
 
   .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; font-size: 0.88rem; }
   .field span { color: var(--muted); font-size: 0.8rem; }
@@ -402,21 +448,10 @@
         </div>
       </div>
 
-      <div class="table-wrap">
-        <table class="roster">
-          <thead>
-            <tr>
-              <th class="c-num">เลขที่</th>
-              <th>ชื่อ-สกุล</th>
-              <th class="c-score">คะแนนจิตพิสัย</th>
-              <th class="c-actions">การดำเนินการ</th>
-            </tr>
-          </thead>
-          <tbody id="studentRows"></tbody>
-        </table>
-        <p id="noStudents" class="empty-hint hidden">ยังไม่มีนักเรียนในห้องนี้ กด "+ นักเรียน" หรือ "นำเข้ารายชื่อ"</p>
-        <p id="noResults" class="empty-hint hidden">ไม่พบนักเรียนที่ค้นหา</p>
-      </div>
+      <p class="hint">แตะ + / − เพื่อปรับคะแนนทันที หรือแตะที่กล่องนักเรียนเพื่อดูรายละเอียด ให้คะแนนแบบกำหนดเอง หรือแก้ไข/ลบ</p>
+      <div id="studentRows" class="roster-grid"></div>
+      <p id="noStudents" class="empty-hint hidden">ยังไม่มีนักเรียนในห้องนี้ กด "+ นักเรียน" หรือ "นำเข้ารายชื่อ"</p>
+      <p id="noResults" class="empty-hint hidden">ไม่พบนักเรียนที่ค้นหา</p>
     </section>
   </main>
 </div>
@@ -731,32 +766,47 @@
       const total = studentTotal(student.id);
       const pct = cls.maxScore > 0 ? Math.max(0, Math.min(100, (total / cls.maxScore) * 100)) : 0;
       const pillClass = scorePillClass(total, cls.maxScore);
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="c-num">${escapeHtml(student.number)}</td>
-        <td>${escapeHtml(student.name)}</td>
-        <td class="c-score">
-          <div class="score-pill-row">
-            <span class="score-pill ${pillClass}">${total}</span>
-            <span class="score-of">/ ${cls.maxScore}</span>
-          </div>
-          <div class="score-bar"><div class="score-bar-fill" style="width:${pct}%"></div></div>
-        </td>
-        <td class="c-actions">
-          <button class="btn btn-small btn-primary" data-action="score">ให้คะแนน / ประวัติ</button>
-          <button class="btn-icon" data-action="edit" title="แก้ไขข้อมูล">✏️</button>
-          <button class="btn-icon" data-action="delete" title="ลบนักเรียน">🗑️</button>
-        </td>
+      const card = document.createElement('div');
+      card.className = 'student-card';
+      card.innerHTML = `
+        <div class="card-top">
+          <span class="card-number">${escapeHtml(student.number)}</span>
+          <button type="button" class="card-more" title="รายละเอียด/ประวัติ/แก้ไข">⋯</button>
+        </div>
+        <div class="card-name">${escapeHtml(student.name)}</div>
+        <div class="card-score-row">
+          <button type="button" class="card-score-btn minus" data-delta="-1" aria-label="ลบ 1 คะแนน">−</button>
+          <span class="card-score-value ${pillClass}">${total}</span>
+          <button type="button" class="card-score-btn plus" data-delta="1" aria-label="เพิ่ม 1 คะแนน">+</button>
+        </div>
+        <div class="card-bar"><div class="card-bar-fill" style="width:${pct}%"></div></div>
+        <div class="card-of">/ ${cls.maxScore}</div>
       `;
-      tr.querySelector('[data-action="score"]').addEventListener('click', () => openStudentScoreModal(cls.id, student.id));
-      tr.querySelector('[data-action="edit"]').addEventListener('click', () => openEditStudentModal(cls.id, student.id));
-      tr.querySelector('[data-action="delete"]').addEventListener('click', () => deleteStudent(cls.id, student.id));
-      studentRowsEl.appendChild(tr);
+      card.addEventListener('click', () => openStudentScoreModal(cls.id, student.id));
+      card.querySelector('.card-more').addEventListener('click', (e) => {
+        e.stopPropagation();
+        openStudentScoreModal(cls.id, student.id);
+      });
+      card.querySelectorAll('[data-delta]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          quickAdjust(cls.id, student.id, parseFloat(btn.dataset.delta));
+        });
+      });
+      studentRowsEl.appendChild(card);
     });
   }
 
+  async function quickAdjust(classId, studentId, delta) {
+    await backend.addScore(classId, studentId, { id: uid(), points: delta, reason: '', date: todayStr(), createdAt: Date.now() });
+    showToast(delta > 0 ? `+${delta} คะแนน` : `${delta} คะแนน`);
+  }
+
   // ---------- Modal ----------
-  function openModal(title) { modalTitle.textContent = title; modal.showModal(); }
+  function openModal(title) {
+    modalTitle.textContent = title;
+    if (!modal.open) modal.showModal();
+  }
   function closeModal() {
     modal.close();
     modalBody.innerHTML = '';
@@ -858,10 +908,11 @@
 
   async function deleteStudent(classId, studentId) {
     const student = getStudent(classId, studentId);
-    if (!student) return;
-    if (!confirm(`ยืนยันลบนักเรียน "${student.name}" พร้อมประวัติคะแนนทั้งหมด?`)) return;
+    if (!student) return false;
+    if (!confirm(`ยืนยันลบนักเรียน "${student.name}" พร้อมประวัติคะแนนทั้งหมด?`)) return false;
     await backend.deleteStudent(classId, studentId);
     showToast('ลบนักเรียนแล้ว');
+    return true;
   }
 
   function openImportStudentsModal(classId) {
@@ -917,8 +968,21 @@
     if (!student || !cls) return;
     openModal(`${student.name} (เลขที่ ${student.number})`);
     renderScoreModalBody(classId, studentId);
-    modalFooter.innerHTML = `<button type="button" class="btn btn-ghost" data-close>ปิด</button>`;
+    modalFooter.innerHTML = `
+      <div style="display:flex;gap:8px;margin-right:auto;">
+        <button type="button" class="btn btn-ghost" data-edit>✏️ แก้ไขข้อมูล</button>
+        <button type="button" class="btn btn-danger" data-delete-student>🗑️ ลบนักเรียน</button>
+      </div>
+      <button type="button" class="btn btn-ghost" data-close>ปิด</button>
+    `;
     modalFooter.querySelector('[data-close]').addEventListener('click', closeModal);
+    modalFooter.querySelector('[data-edit]').addEventListener('click', () => {
+      openEditStudentModal(classId, studentId);
+    });
+    modalFooter.querySelector('[data-delete-student]').addEventListener('click', async () => {
+      const deleted = await deleteStudent(classId, studentId);
+      if (deleted) closeModal();
+    });
     modalForm.onsubmit = async (e) => {
       e.preventDefault();
       const points = parseFloat(document.getElementById('f-points').value);

@@ -47,21 +47,10 @@
         </div>
       </div>
 
-      <div class="table-wrap">
-        <table class="student-table">
-          <thead>
-            <tr>
-              <th class="col-number">เลขที่</th>
-              <th class="col-name">ชื่อ-สกุล</th>
-              <th class="col-score">คะแนนรวม</th>
-              <th class="col-actions">การดำเนินการ</th>
-            </tr>
-          </thead>
-          <tbody id="studentRows"></tbody>
-        </table>
-        <p id="noStudents" class="empty-hint hidden">ยังไม่มีนักเรียนในห้องนี้ กด "เพิ่มนักเรียน" หรือ "นำเข้ารายชื่อ"</p>
-        <p id="noResults" class="empty-hint hidden">ไม่พบนักเรียนที่ค้นหา</p>
-      </div>
+      <p class="hint">แตะ + / − เพื่อปรับคะแนนทันที หรือแตะที่กล่องนักเรียนเพื่อดูรายละเอียด ให้คะแนนแบบกำหนดเอง หรือแก้ไข/ลบ</p>
+      <div id="studentRows" class="roster-grid"></div>
+      <p id="noStudents" class="empty-hint hidden">ยังไม่มีนักเรียนในห้องนี้ กด "เพิ่มนักเรียน" หรือ "นำเข้ารายชื่อ"</p>
+      <p id="noResults" class="empty-hint hidden">ไม่พบนักเรียนที่ค้นหา</p>
     </section>
   </main>
 
