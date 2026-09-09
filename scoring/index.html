@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบให้คะแนนจิตพิสัยนักเรียน</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-title">
+      <h1>📋 ระบบให้คะแนนจิตพิสัยนักเรียน</h1>
+      <p class="subtitle">บันทึกและจัดการคะแนนจิตพิสัยของนักเรียนแต่ละห้อง</p>
+    </div>
+    <div class="header-actions">
+      <button id="btnExport" class="btn btn-ghost" title="สำรองข้อมูลทั้งหมดเป็นไฟล์ JSON">⬇️ สำรองข้อมูล</button>
+      <label class="btn btn-ghost" title="กู้คืน/นำเข้าข้อมูลจากไฟล์ JSON">
+        ⬆️ กู้คืนข้อมูล
+        <input type="file" id="importFile" accept="application/json" hidden>
+      </label>
+    </div>
+  </header>
+
+  <main>
+    <section class="class-bar">
+      <div class="class-tabs" id="classTabs"></div>
+      <button id="btnAddClass" class="btn btn-primary">+ เพิ่มห้องเรียน</button>
+    </section>
+
+    <section id="emptyState" class="empty-state hidden">
+      <p>ยังไม่มีห้องเรียน เริ่มต้นโดยกดปุ่ม "เพิ่มห้องเรียน" หรือกู้คืนข้อมูลจากไฟล์สำรอง</p>
+    </section>
+
+    <section id="classView" class="class-view hidden">
+      <div class="class-toolbar">
+        <div class="class-info">
+          <h2 id="className"></h2>
+          <span id="classMeta" class="meta"></span>
+          <button id="btnEditClass" class="btn-icon" title="แก้ไข/ลบห้องเรียน">⚙️</button>
+        </div>
+        <div class="toolbar-actions">
+          <input type="search" id="searchInput" placeholder="ค้นหาเลขที่หรือชื่อ...">
+          <button id="btnAddStudent" class="btn btn-secondary">+ เพิ่มนักเรียน</button>
+          <button id="btnImportStudents" class="btn btn-secondary">นำเข้ารายชื่อ</button>
+          <button id="btnExportCsv" class="btn btn-ghost">ส่งออก CSV</button>
+          <button id="btnPrint" class="btn btn-ghost">🖨️ พิมพ์รายงาน</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="student-table">
+          <thead>
+            <tr>
+              <th class="col-number">เลขที่</th>
+              <th class="col-name">ชื่อ-สกุล</th>
+              <th class="col-score">คะแนนรวม</th>
+              <th class="col-actions">การดำเนินการ</th>
+            </tr>
+          </thead>
+          <tbody id="studentRows"></tbody>
+        </table>
+        <p id="noStudents" class="empty-hint hidden">ยังไม่มีนักเรียนในห้องนี้ กด "เพิ่มนักเรียน" หรือ "นำเข้ารายชื่อ"</p>
+        <p id="noResults" class="empty-hint hidden">ไม่พบนักเรียนที่ค้นหา</p>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="modal">
+    <form method="dialog" id="modalForm">
+      <div class="modal-header">
+        <h3 id="modalTitle"></h3>
+        <button type="button" id="modalClose" class="btn-icon" aria-label="ปิด">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-footer" id="modalFooter"></div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
