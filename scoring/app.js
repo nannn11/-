@@ -48,6 +48,7 @@
   const modalForm = document.getElementById('modalForm');
 
   const toastEl = document.getElementById('toast');
+  const todayActivityBtn = document.getElementById('btnTodayActivity');
 
   // ---------- Helpers ----------
   function todayStr() {
@@ -84,6 +85,25 @@
       .sort((a, b) => b.createdAt - a.createdAt);
   }
 
+  function todaysEntries() {
+    const today = todayStr();
+    const rows = [];
+    state.classes.forEach((cls) => {
+      cls.students.forEach((student) => {
+        state.scores
+          .filter((s) => s.studentId === student.id && s.date === today)
+          .forEach((entry) => {
+            rows.push({ ...entry, studentName: student.name, studentNumber: student.number, className: cls.name });
+          });
+      });
+    });
+    return rows.sort((a, b) => b.createdAt - a.createdAt);
+  }
+
+  function updateTodayBadge() {
+    todayActivityBtn.textContent = `📅 วันนี้ (${todaysEntries().length})`;
+  }
+
   function sortStudents(students) {
     return [...students].sort((a, b) => {
       const na = parseFloat(a.number);
@@ -109,6 +129,7 @@
   // ---------- Rendering ----------
   function render() {
     renderClassTabs();
+    updateTodayBadge();
     if (!currentClassId || !getClass(currentClassId)) {
       currentClassId = state.classes[0]?.id ?? null;
     }
@@ -558,6 +579,49 @@
     });
   }
 
+  function openTodayActivityModal() {
+    const rows = todaysEntries();
+    const plus = rows.filter((r) => r.points > 0).reduce((sum, r) => sum + r.points, 0);
+    const minus = rows.filter((r) => r.points < 0).reduce((sum, r) => sum + r.points, 0);
+    openModal(`กิจกรรมวันนี้ · ${formatDateTh(todayStr())}`);
+    modalBody.innerHTML = `
+      <div class="score-total-banner">รวม ${rows.length} รายการ · ให้คะแนนรวม <strong>+${plus}</strong> · หักคะแนนรวม <strong class="negative">${minus}</strong></div>
+      <div class="history-list">
+        ${
+          rows.length === 0
+            ? '<p class="empty-hint">วันนี้ยังไม่มีการให้หรือลบคะแนน</p>'
+            : rows
+                .map(
+                  (r) => `
+          <div class="history-row" data-class="${r.classId}" data-student="${r.studentId}" style="cursor:pointer;">
+            <div class="history-info">
+              <span class="history-points ${r.points < 0 ? 'negative' : ''}">${r.points > 0 ? '+' : ''}${r.points}</span>
+              <span class="history-reason">${escapeHtml(r.studentName)} · ${escapeHtml(r.className)}${r.reason ? ' · ' + escapeHtml(r.reason) : ''}</span>
+              <span class="history-date">${new Date(r.createdAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+          </div>
+        `
+                )
+                .join('')
+        }
+      </div>
+    `;
+    modalFooter.innerHTML = `<button type="button" class="btn btn-ghost" data-close>ปิด</button>`;
+    modalFooter.querySelector('[data-close]').addEventListener('click', closeModal);
+    modalForm.onsubmit = null;
+    modalBody.querySelectorAll('[data-student]').forEach((row) => {
+      row.addEventListener('click', () => {
+        const classId = row.dataset.class;
+        const studentId = row.dataset.student;
+        currentClassId = classId;
+        searchQuery = '';
+        searchInput.value = '';
+        render();
+        openStudentScoreModal(classId, studentId);
+      });
+    });
+  }
+
   // ---------- Export / Import (full backup) ----------
   function downloadBlob(blob, filename) {
     const url = URL.createObjectURL(blob);
@@ -629,6 +693,7 @@
   }
 
   // ---------- Wire up global buttons ----------
+  document.getElementById('btnTodayActivity').addEventListener('click', openTodayActivityModal);
   document.getElementById('btnAddClass').addEventListener('click', openAddClassModal);
   document.getElementById('btnEditClass').addEventListener('click', () => openEditClassModal(currentClassId));
   document.getElementById('btnAddStudent').addEventListener('click', () => openAddStudentModal(currentClassId));

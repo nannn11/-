@@ -415,6 +415,7 @@
     </div>
     <div class="topbar-actions">
       <span id="syncBadge" class="sync-badge">กำลังเชื่อมต่อ…</span>
+      <button id="btnTodayActivity" class="btn btn-secondary" title="ดูรายการให้/ลบคะแนนวันนี้ ทุกห้อง">📅 วันนี้ (0)</button>
       <button id="btnExport" class="btn btn-ghost" title="สำรองข้อมูลทั้งหมดเป็นไฟล์ JSON">⬇️ สำรองข้อมูล</button>
       <label class="btn btn-ghost" title="กู้คืนข้อมูลจากไฟล์ JSON">
         ⬆️ กู้คืนข้อมูล
@@ -496,6 +497,7 @@
   const noResultsEl = document.getElementById('noResults');
   const searchInput = document.getElementById('searchInput');
   const syncBadge = document.getElementById('syncBadge');
+  const todayActivityBtn = document.getElementById('btnTodayActivity');
 
   const modal = document.getElementById('modal');
   const modalTitle = document.getElementById('modalTitle');
@@ -520,6 +522,25 @@
   }
   function studentEntries(studentId) { return state.scoresByStudent[studentId] || []; }
   function studentTotal(studentId) { return studentEntries(studentId).reduce((sum, e) => sum + e.points, 0); }
+
+  function todaysEntries() {
+    const today = todayStr();
+    const rows = [];
+    state.classes.forEach((cls) => {
+      cls.students.forEach((student) => {
+        studentEntries(student.id).forEach((entry) => {
+          if (entry.date === today) {
+            rows.push({ ...entry, studentId: student.id, studentName: student.name, studentNumber: student.number, classId: cls.id, className: cls.name });
+          }
+        });
+      });
+    });
+    return rows.sort((a, b) => b.createdAt - a.createdAt);
+  }
+
+  function updateTodayBadge() {
+    todayActivityBtn.textContent = `📅 วันนี้ (${todaysEntries().length})`;
+  }
 
   function sortStudents(students) {
     return [...students].sort((a, b) => {
@@ -565,7 +586,9 @@
         render();
       },
       async addClass({ name, maxScore }) {
-        state.classes.push({ id: uid(), name, maxScore, teacher: null, students: [], order: Date.now() });
+        const cls = { id: uid(), name, maxScore, teacher: null, students: [], order: Date.now() };
+        state.classes.push(cls);
+        currentClassId = cls.id;
         persist(); render();
       },
       async updateClass(classId, patch) {
@@ -639,7 +662,8 @@
       mode: 'db',
       async init() {},
       async addClass({ name, maxScore }) {
-        await classesCol.add({ name, maxScore, teacher: null, students: [], order: Date.now() });
+        const ref = await classesCol.add({ name, maxScore, teacher: null, students: [], order: Date.now() });
+        currentClassId = ref.id;
       },
       async updateClass(classId, patch) {
         await classesCol.doc(classId).update(patch);
@@ -706,6 +730,7 @@
   // ---------- Rendering ----------
   function render() {
     renderClassTabs();
+    updateTodayBadge();
     if (!currentClassId || !getClass(currentClassId)) currentClassId = state.classes[0]?.id ?? null;
     loadingStateEl.classList.add('hidden');
     if (!currentClassId) {
@@ -1035,6 +1060,41 @@
     });
   }
 
+  function openTodayActivityModal() {
+    const rows = todaysEntries();
+    const plus = rows.filter((r) => r.points > 0).reduce((sum, r) => sum + r.points, 0);
+    const minus = rows.filter((r) => r.points < 0).reduce((sum, r) => sum + r.points, 0);
+    openModal(`กิจกรรมวันนี้ · ${formatDateTh(todayStr())}`);
+    modalBody.innerHTML = `
+      <div class="score-total-banner">รวม ${rows.length} รายการ · ให้คะแนนรวม <strong>+${plus}</strong> · หักคะแนนรวม <strong class="negative">${minus}</strong></div>
+      <div class="history-list">
+        ${rows.length === 0 ? '<p class="empty-hint">วันนี้ยังไม่มีการให้หรือลบคะแนน</p>' : rows.map((r) => `
+          <div class="history-row" data-class="${r.classId}" data-student="${r.studentId}" style="cursor:pointer;">
+            <div class="history-info">
+              <span class="history-points ${r.points < 0 ? 'negative' : ''}">${r.points > 0 ? '+' : ''}${r.points}</span>
+              <span class="history-reason">${escapeHtml(r.studentName)} · ${escapeHtml(r.className)}${r.reason ? ' · ' + escapeHtml(r.reason) : ''}</span>
+              <span class="history-date">${new Date(r.createdAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    modalFooter.innerHTML = `<button type="button" class="btn btn-ghost" data-close>ปิด</button>`;
+    modalFooter.querySelector('[data-close]').addEventListener('click', closeModal);
+    modalForm.onsubmit = null;
+    modalBody.querySelectorAll('[data-student]').forEach((row) => {
+      row.addEventListener('click', () => {
+        const classId = row.dataset.class;
+        const studentId = row.dataset.student;
+        currentClassId = classId;
+        searchQuery = '';
+        searchInput.value = '';
+        render();
+        openStudentScoreModal(classId, studentId);
+      });
+    });
+  }
+
   // ---------- File save (downloads capability, fallback to blob link) ----------
   let downloadsApi = null;
   async function saveFile(filename, content, mime) {
@@ -1099,6 +1159,7 @@
   }
 
   // ---------- Wire up global buttons ----------
+  document.getElementById('btnTodayActivity').addEventListener('click', openTodayActivityModal);
   document.getElementById('btnAddClassEmpty').addEventListener('click', openAddClassModal);
   document.getElementById('btnEditClass').addEventListener('click', () => openEditClassModal(currentClassId));
   document.getElementById('btnAddStudent').addEventListener('click', () => openAddStudentModal(currentClassId));
