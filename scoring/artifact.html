@@ -1,4 +1,4 @@
-<title>ทะเบียนจิตพิสัย ป.1</title>
+<title>วิจัยจิตพิสัย ป.1/3</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@600;700&family=Noto+Sans+Thai:wght@400;500;600&display=swap">
 <style>
   :root {
@@ -155,10 +155,6 @@
   .btn-ghost:hover { background: var(--surface-2); }
   .btn-danger { background: var(--negative); color: #fff; }
   .btn-danger:hover { filter: brightness(0.92); }
-  .btn-small {
-    padding: 5px 10px; font-size: 0.8rem; border-radius: 6px;
-    border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer;
-  }
   .btn-icon {
     background: transparent; border: 1px solid transparent; cursor: pointer;
     font-size: 1rem; padding: 4px 6px; border-radius: 6px; line-height: 1;
@@ -168,7 +164,7 @@
     outline: 2px solid var(--accent); outline-offset: 2px;
   }
 
-  .class-tabs {
+  .occasion-tabs {
     display: flex;
     flex-wrap: nowrap;
     overflow-x: auto;
@@ -177,7 +173,7 @@
     margin-bottom: 18px;
     padding-bottom: 1px;
   }
-  .class-tab {
+  .occasion-tab {
     font-family: inherit;
     font-size: 0.88rem;
     padding: 9px 14px;
@@ -188,22 +184,12 @@
     cursor: pointer;
     white-space: nowrap;
   }
-  .class-tab.active {
+  .occasion-tab.active {
     color: var(--accent-strong);
     border-bottom-color: var(--gold);
     font-weight: 600;
   }
-  .class-tab-add {
-    font-family: inherit;
-    font-size: 0.88rem;
-    padding: 9px 14px;
-    background: transparent;
-    border: none;
-    color: var(--accent);
-    cursor: pointer;
-    white-space: nowrap;
-    font-weight: 600;
-  }
+  .occasion-tab .tab-check { color: var(--positive); margin-right: 4px; }
 
   .state-message {
     text-align: center;
@@ -211,14 +197,14 @@
     padding: 70px 20px;
   }
 
-  .class-view {
+  .main-view {
     background: var(--surface);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     padding: 20px;
   }
 
-  .class-toolbar {
+  .view-toolbar {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
@@ -227,8 +213,8 @@
     margin-bottom: 16px;
   }
 
-  .class-identity h2 { font-size: 1.2rem; }
-  .class-meta {
+  .view-identity h2 { font-size: 1.2rem; }
+  .view-meta {
     margin: 4px 0 0;
     color: var(--muted);
     font-size: 0.84rem;
@@ -241,14 +227,22 @@
     align-items: center;
   }
 
-  #searchInput {
+  #searchInput, #occasionDateInput {
     font-family: inherit;
     padding: 8px 12px;
     border-radius: 8px;
     border: 1px solid var(--line);
     background: var(--paper);
     color: var(--ink);
-    min-width: 170px;
+  }
+  #searchInput { min-width: 170px; }
+
+  .date-field {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.84rem;
+    color: var(--muted);
   }
 
   .roster-grid {
@@ -283,17 +277,6 @@
     padding: 2px 8px;
     border-radius: 999px;
   }
-  .card-more {
-    background: transparent;
-    border: none;
-    color: var(--muted);
-    cursor: pointer;
-    font-size: 1.1rem;
-    padding: 0 4px;
-    border-radius: 6px;
-    line-height: 1;
-  }
-  .card-more:hover { background: var(--surface-2); color: var(--ink); }
   .card-name {
     font-weight: 600;
     font-size: 0.9rem;
@@ -310,24 +293,6 @@
     justify-content: center;
     gap: 8px;
   }
-  .card-score-btn {
-    width: 38px;
-    height: 38px;
-    flex-shrink: 0;
-    border-radius: 10px;
-    border: 1px solid var(--line);
-    background: var(--surface);
-    color: var(--accent-strong);
-    font-size: 1.25rem;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-  }
-  .card-score-btn:hover { background: var(--accent-soft); }
-  .card-score-btn.minus { color: var(--negative); }
   .card-score-value {
     min-width: 40px;
     text-align: center;
@@ -338,9 +303,11 @@
   }
   .card-score-value.mid { color: var(--gold); }
   .card-score-value.low { color: var(--negative); }
+  .card-score-value.unset { color: var(--muted); font-size: 1rem; }
   .card-bar { width: 100%; height: 5px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
   .card-bar-fill { height: 100%; border-radius: 999px; background: var(--gold); }
   .card-of { text-align: center; color: var(--muted); font-size: 0.72rem; }
+  .card-partial { text-align: center; color: var(--gold); font-size: 0.7rem; }
 
   .empty-hint { text-align: center; color: var(--muted); padding: 26px; }
 
@@ -368,37 +335,39 @@
 
   .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; font-size: 0.88rem; }
   .field span { color: var(--muted); font-size: 0.8rem; }
-  .field input, .field textarea {
+  .field input {
     font-family: inherit; font-size: 0.94rem; padding: 9px 11px; border-radius: 8px;
     border: 1px solid var(--line); background: var(--paper); color: var(--ink);
   }
-  .field-inline { display: flex; align-items: center; gap: 8px; font-size: 0.86rem; margin-bottom: 8px; }
-  .hint { font-size: 0.84rem; color: var(--muted); margin-top: 0; }
-  .hint code { background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
-  #f-importText { width: 100%; font-family: inherit; padding: 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); resize: vertical; }
-  .danger-zone-label { color: var(--negative); font-size: 0.78rem; font-weight: 600; margin-bottom: 8px; }
+  .hint { font-size: 0.84rem; color: var(--muted); margin: 0 0 12px; }
 
   .score-total-banner { background: var(--surface-2); padding: 10px 14px; border-radius: 8px; margin-bottom: 14px; font-size: 0.94rem; }
-  .score-total-banner strong.negative { color: var(--negative); }
-  .preset-buttons { display: flex; flex-wrap: wrap; gap: 6px; margin: -6px 0 14px; }
-  .history-heading { margin: 18px 0 8px; font-size: 0.92rem; }
-  .history-list { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; }
-  .history-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; background: var(--surface-2); border-radius: 8px; }
-  .history-info { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 0.86rem; }
-  .history-points { font-weight: 700; min-width: 30px; font-variant-numeric: tabular-nums; }
-  .history-points.negative { color: var(--negative); }
-  .history-date { color: var(--muted); font-size: 0.78rem; }
 
-  #printArea { display: none; }
-  @media print {
-    body > *:not(#printArea) { display: none !important; }
-    #printArea { display: block !important; color: #000; background: #fff; }
-    #printArea table { width: 100%; border-collapse: collapse; }
-    #printArea th, #printArea td { border: 1px solid #333; padding: 6px 8px; text-align: left; }
+  .criterion-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 10px; background: var(--surface-2); border-radius: 8px; margin-bottom: 8px;
+  }
+  .criterion-label { font-size: 0.88rem; }
+  .level-buttons { display: flex; gap: 6px; flex-shrink: 0; }
+  .level-btn {
+    width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--line);
+    background: var(--surface); color: var(--ink); font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .level-btn:hover { background: var(--accent-soft); }
+  .level-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  .criteria-list-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px; background: var(--surface-2); border-radius: 8px; margin-bottom: 6px;
+  }
+  .criteria-input {
+    flex: 1; font-family: inherit; font-size: 0.9rem; padding: 6px 8px; border-radius: 6px;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink);
   }
 
   @media (max-width: 640px) {
-    .class-toolbar { flex-direction: column; align-items: stretch; }
+    .view-toolbar { flex-direction: column; align-items: stretch; }
     .toolbar-actions { justify-content: flex-start; }
     #searchInput { flex: 1; min-width: 0; }
   }
@@ -407,16 +376,17 @@
 <div class="app">
   <header class="topbar">
     <div class="brand">
-      <span class="brand-mark">📋</span>
+      <span class="brand-mark">🔬</span>
       <div>
-        <h1>ทะเบียนจิตพิสัย <span class="brand-sub">ป.1</span></h1>
-        <p class="tagline">ให้คะแนนและลบคะแนนจิตพิสัยนักเรียน แยกตามห้องเรียน</p>
+        <h1>เครื่องมือวิจัยจิตพิสัย <span class="brand-sub">ป.1/3</span></h1>
+        <p class="tagline">บันทึกคะแนนความประพฤตินักเรียน 40 คน · 4 ครั้ง</p>
       </div>
     </div>
     <div class="topbar-actions">
       <span id="syncBadge" class="sync-badge">กำลังเชื่อมต่อ…</span>
-      <button id="btnTodayActivity" class="btn btn-secondary" title="ดูรายการให้/ลบคะแนนวันนี้ ทุกห้อง">📅 วันนี้ (0)</button>
-      <button id="btnExport" class="btn btn-ghost" title="สำรองข้อมูลทั้งหมดเป็นไฟล์ JSON">⬇️ สำรองข้อมูล</button>
+      <button id="btnCriteria" class="btn btn-secondary" title="ตั้งค่าหัวข้อประเมิน">⚙️ หัวข้อประเมิน</button>
+      <button id="btnExportCsv" class="btn btn-ghost" title="ส่งออกข้อมูลทั้ง 4 ครั้งเป็น CSV สำหรับวิเคราะห์">⬇️ CSV</button>
+      <button id="btnExport" class="btn btn-ghost" title="สำรองข้อมูลทั้งหมดเป็นไฟล์ JSON">💾 สำรองข้อมูล</button>
       <label class="btn btn-ghost" title="กู้คืนข้อมูลจากไฟล์ JSON">
         ⬆️ กู้คืนข้อมูล
         <input type="file" id="importFile" accept="application/json" hidden>
@@ -424,34 +394,30 @@
     </div>
   </header>
 
-  <nav class="class-tabs" id="classTabs" aria-label="ห้องเรียน"></nav>
+  <nav class="occasion-tabs" id="occasionTabs" aria-label="ครั้งที่บันทึก"></nav>
 
-  <main id="mainArea">
+  <main>
     <div id="loadingState" class="state-message">กำลังโหลดข้อมูล…</div>
     <div id="emptyState" class="state-message hidden">
-      <p>ยังไม่มีห้องเรียน เริ่มต้นโดยกดปุ่ม “เพิ่มห้องเรียน” หรือกู้คืนข้อมูลจากไฟล์สำรอง</p>
-      <button id="btnAddClassEmpty" class="btn btn-primary">+ เพิ่มห้องเรียน</button>
+      <p>ยังไม่พบข้อมูลนักเรียน ป.1/3 — เปิดผ่านลิงก์นี้บน claude.ai เพื่อดึงข้อมูลอัตโนมัติ หรือกู้คืนจากไฟล์สำรอง</p>
     </div>
 
-    <section id="classView" class="class-view hidden">
-      <div class="class-toolbar">
-        <div class="class-identity">
-          <h2 id="className"></h2>
-          <p class="class-meta" id="classMeta"></p>
+    <section id="mainView" class="main-view hidden">
+      <div class="view-toolbar">
+        <div class="view-identity">
+          <h2 id="occasionTitle"></h2>
+          <p class="view-meta" id="occasionMeta"></p>
         </div>
         <div class="toolbar-actions">
+          <label class="date-field">
+            <span>วันที่บันทึก</span>
+            <input type="date" id="occasionDateInput">
+          </label>
           <input type="search" id="searchInput" placeholder="ค้นหาเลขที่หรือชื่อ...">
-          <button id="btnAddStudent" class="btn btn-secondary">+ นักเรียน</button>
-          <button id="btnImportStudents" class="btn btn-secondary">นำเข้ารายชื่อ</button>
-          <button id="btnExportCsv" class="btn btn-ghost">CSV</button>
-          <button id="btnPrint" class="btn btn-ghost">🖨️ พิมพ์</button>
-          <button id="btnEditClass" class="btn-icon" title="แก้ไข/ลบห้องเรียน">⚙️</button>
         </div>
       </div>
-
-      <p class="hint">แตะ + / − เพื่อปรับคะแนนทันที หรือแตะที่กล่องนักเรียนเพื่อดูรายละเอียด ให้คะแนนแบบกำหนดเอง หรือแก้ไข/ลบ</p>
+      <p class="hint">แตะที่กล่องนักเรียนเพื่อกรอกคะแนนแต่ละหัวข้อของครั้งนี้ (0-2 คะแนนต่อข้อ)</p>
       <div id="studentRows" class="roster-grid"></div>
-      <p id="noStudents" class="empty-hint hidden">ยังไม่มีนักเรียนในห้องนี้ กด "+ นักเรียน" หรือ "นำเข้ารายชื่อ"</p>
       <p id="noResults" class="empty-hint hidden">ไม่พบนักเรียนที่ค้นหา</p>
     </section>
   </main>
@@ -474,10 +440,27 @@
 (() => {
   'use strict';
 
-  const LOCAL_KEY = 'psychomotorScoring.v1';
+  const CLASS_ID = 'p1-3';
+  const LOCAL_KEY = 'psychomotorResearch.v1';
+  const OCCASIONS = [1, 2, 3, 4];
+  const MAX_PER_ITEM = 2;
+  const DEFAULT_CRITERIA = [
+    { id: 'c1', label: 'ความรับผิดชอบ' },
+    { id: 'c2', label: 'ความมีระเบียบวินัย' },
+    { id: 'c3', label: 'ความตั้งใจเรียน' },
+    { id: 'c4', label: 'ความร่วมมือ' },
+    { id: 'c5', label: 'มารยาทและความสุภาพ' },
+  ];
 
-  const state = { classes: [], scoresByStudent: {} };
-  let currentClassId = null;
+  const state = {
+    className: 'ป.1/3',
+    teacher: null,
+    students: [],
+    criteria: [],
+    occasionDates: { 1: '', 2: '', 3: '', 4: '' },
+    scores: {},
+  };
+  let currentOccasion = 1;
   let searchQuery = '';
   let backend = null;
 
@@ -486,18 +469,17 @@
   }
 
   // ---------- DOM refs ----------
-  const classTabsEl = document.getElementById('classTabs');
+  const occasionTabsEl = document.getElementById('occasionTabs');
   const loadingStateEl = document.getElementById('loadingState');
   const emptyStateEl = document.getElementById('emptyState');
-  const classViewEl = document.getElementById('classView');
-  const classNameEl = document.getElementById('className');
-  const classMetaEl = document.getElementById('classMeta');
+  const mainViewEl = document.getElementById('mainView');
+  const occasionTitleEl = document.getElementById('occasionTitle');
+  const occasionMetaEl = document.getElementById('occasionMeta');
+  const occasionDateInput = document.getElementById('occasionDateInput');
   const studentRowsEl = document.getElementById('studentRows');
-  const noStudentsEl = document.getElementById('noStudents');
   const noResultsEl = document.getElementById('noResults');
   const searchInput = document.getElementById('searchInput');
   const syncBadge = document.getElementById('syncBadge');
-  const todayActivityBtn = document.getElementById('btnTodayActivity');
 
   const modal = document.getElementById('modal');
   const modalTitle = document.getElementById('modalTitle');
@@ -510,37 +492,13 @@
   function todayStr() { return new Date().toISOString().slice(0, 10); }
 
   function formatDateTh(dateStr) {
+    if (!dateStr) return '';
     try {
       return new Date(dateStr + 'T00:00:00').toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
     } catch { return dateStr; }
   }
 
-  function getClass(classId) { return state.classes.find((c) => c.id === classId) || null; }
-  function getStudent(classId, studentId) {
-    const cls = getClass(classId);
-    return cls ? cls.students.find((s) => s.id === studentId) || null : null;
-  }
-  function studentEntries(studentId) { return state.scoresByStudent[studentId] || []; }
-  function studentTotal(studentId) { return studentEntries(studentId).reduce((sum, e) => sum + e.points, 0); }
-
-  function todaysEntries() {
-    const today = todayStr();
-    const rows = [];
-    state.classes.forEach((cls) => {
-      cls.students.forEach((student) => {
-        studentEntries(student.id).forEach((entry) => {
-          if (entry.date === today) {
-            rows.push({ ...entry, studentId: student.id, studentName: student.name, studentNumber: student.number, classId: cls.id, className: cls.name });
-          }
-        });
-      });
-    });
-    return rows.sort((a, b) => b.createdAt - a.createdAt);
-  }
-
-  function updateTodayBadge() {
-    todayActivityBtn.textContent = `📅 วันนี้ (${todaysEntries().length})`;
-  }
+  function getStudent(studentId) { return state.students.find((s) => s.id === studentId) || null; }
 
   function sortStudents(students) {
     return [...students].sort((a, b) => {
@@ -548,6 +506,27 @@
       if (!Number.isNaN(na) && !Number.isNaN(nb) && na !== nb) return na - nb;
       return a.number.localeCompare(b.number, 'th') || a.name.localeCompare(b.name, 'th');
     });
+  }
+
+  function occasionSummary(studentId, occasionNum) {
+    const rec = state.scores[studentId]?.occasions?.[occasionNum]?.scores || {};
+    let total = 0;
+    let answered = 0;
+    state.criteria.forEach((c) => {
+      const v = rec[c.id];
+      if (typeof v === 'number') { total += v; answered++; }
+    });
+    return { total, answered, totalCriteria: state.criteria.length };
+  }
+
+  function maxTotal() { return state.criteria.length * MAX_PER_ITEM; }
+
+  function scorePillClass(total, max) {
+    if (max <= 0) return '';
+    const ratio = total / max;
+    if (ratio < 0.4) return 'low';
+    if (ratio < 0.8) return 'mid';
+    return '';
   }
 
   function showToast(message) {
@@ -566,161 +545,136 @@
     function load() {
       try {
         const raw = localStorage.getItem(LOCAL_KEY);
-        if (!raw) return { classes: [], scoresByStudent: {} };
-        const parsed = JSON.parse(raw);
-        return {
-          classes: Array.isArray(parsed.classes) ? parsed.classes : [],
-          scoresByStudent: parsed.scoresByStudent && typeof parsed.scoresByStudent === 'object' ? parsed.scoresByStudent : {},
-        };
-      } catch { return { classes: [], scoresByStudent: {} }; }
+        if (!raw) return null;
+        return JSON.parse(raw);
+      } catch { return null; }
     }
     function persist() {
-      localStorage.setItem(LOCAL_KEY, JSON.stringify({ classes: state.classes, scoresByStudent: state.scoresByStudent }));
+      localStorage.setItem(LOCAL_KEY, JSON.stringify({
+        className: state.className, teacher: state.teacher, students: state.students,
+        criteria: state.criteria, occasionDates: state.occasionDates, scores: state.scores,
+      }));
     }
     return {
       mode: 'local',
       async init() {
         const loaded = load();
-        state.classes = loaded.classes;
-        state.scoresByStudent = loaded.scoresByStudent;
+        if (loaded) {
+          state.className = loaded.className || state.className;
+          state.teacher = loaded.teacher || null;
+          state.students = Array.isArray(loaded.students) ? loaded.students : [];
+          state.criteria = Array.isArray(loaded.criteria) ? loaded.criteria : DEFAULT_CRITERIA;
+          state.occasionDates = loaded.occasionDates || { 1: '', 2: '', 3: '', 4: '' };
+          state.scores = loaded.scores || {};
+        } else {
+          state.criteria = DEFAULT_CRITERIA;
+        }
         render();
       },
-      async addClass({ name, maxScore }) {
-        const cls = { id: uid(), name, maxScore, teacher: null, students: [], order: Date.now() };
-        state.classes.push(cls);
-        currentClassId = cls.id;
+      async setCriteria(newList) { state.criteria = newList; persist(); render(); },
+      async setOccasionDate(occasionNum, dateStr) {
+        state.occasionDates = { ...state.occasionDates, [occasionNum]: dateStr };
         persist(); render();
       },
-      async updateClass(classId, patch) {
-        Object.assign(getClass(classId), patch);
+      async setScore(studentId, occasionNum, criterionId, value) {
+        const current = state.scores[studentId] || { occasions: {} };
+        const occasion = current.occasions[occasionNum] || { scores: {} };
+        const newScores = { ...occasion.scores };
+        if (value === null) delete newScores[criterionId]; else newScores[criterionId] = value;
+        state.scores = { ...state.scores, [studentId]: { occasions: { ...current.occasions, [occasionNum]: { scores: newScores } } } };
         persist(); render();
       },
-      async deleteClass(classId) {
-        const cls = getClass(classId);
-        if (cls) cls.students.forEach((s) => delete state.scoresByStudent[s.id]);
-        state.classes = state.classes.filter((c) => c.id !== classId);
-        persist(); render();
-      },
-      async addStudent(classId, { number, name }) {
-        getClass(classId).students.push({ id: uid(), number, name });
-        persist(); render();
-      },
-      async updateStudent(classId, studentId, patch) {
-        Object.assign(getStudent(classId, studentId), patch);
-        persist(); render();
-      },
-      async deleteStudent(classId, studentId) {
-        const cls = getClass(classId);
-        cls.students = cls.students.filter((s) => s.id !== studentId);
-        delete state.scoresByStudent[studentId];
-        persist(); render();
-      },
-      async replaceStudents(classId, students) {
-        const cls = getClass(classId);
-        cls.students.forEach((s) => delete state.scoresByStudent[s.id]);
-        cls.students = students;
-        persist(); render();
-      },
-      async addStudents(classId, students) {
-        getClass(classId).students.push(...students);
-        persist(); render();
-      },
-      async addScore(classId, studentId, entry) {
-        const list = state.scoresByStudent[studentId] || (state.scoresByStudent[studentId] = []);
-        list.push(entry);
-        persist(); render();
-      },
-      async deleteScore(classId, studentId, scoreId) {
-        state.scoresByStudent[studentId] = (state.scoresByStudent[studentId] || []).filter((e) => e.id !== scoreId);
+      async updateStudentInfo(studentId, patch) {
+        state.students = state.students.map((s) => (s.id === studentId ? { ...s, ...patch } : s));
         persist(); render();
       },
       async restoreAll(data) {
-        state.classes = data.classes.map((c, i) => ({ teacher: null, order: i, ...c }));
-        state.scoresByStudent = data.scoresByStudent || {};
+        state.className = data.className || state.className;
+        state.teacher = data.teacher || null;
+        state.students = Array.isArray(data.students) ? data.students : [];
+        state.criteria = Array.isArray(data.criteria) ? data.criteria : DEFAULT_CRITERIA;
+        state.occasionDates = data.occasionDates || { 1: '', 2: '', 3: '', 4: '' };
+        state.scores = data.scores || {};
         persist(); render();
       },
     };
   }
 
   function createDbBackend(db) {
-    const classesCol = db.collection('classes');
-    const scoresCol = db.collection('studentScores');
+    const classDoc = db.collection('classes').doc(CLASS_ID);
+    const configDoc = db.collection('config').doc('research');
+    const scoresCol = db.collection('researchScores');
+    let configSeeded = false;
 
-    classesCol.orderBy('order').onSnapshot((snap) => {
-      state.classes = snap.docs.map((d) => ({ id: d.id, students: [], maxScore: 10, teacher: null, ...d.data() }));
+    classDoc.onSnapshot((snap) => {
+      if (snap.exists) {
+        const d = snap.data();
+        state.className = d.name || state.className;
+        state.teacher = d.teacher || null;
+        state.students = Array.isArray(d.students) ? d.students : [];
+      }
       render();
     }, () => { syncBadge.textContent = 'ออฟไลน์ชั่วคราว'; syncBadge.classList.remove('live'); });
 
+    configDoc.onSnapshot((snap) => {
+      if (!snap.exists) {
+        if (!configSeeded) {
+          configSeeded = true;
+          configDoc.set({ criteria: DEFAULT_CRITERIA, occasionDates: { 1: '', 2: '', 3: '', 4: '' } });
+        }
+        return;
+      }
+      const d = snap.data();
+      state.criteria = Array.isArray(d.criteria) ? d.criteria : DEFAULT_CRITERIA;
+      state.occasionDates = d.occasionDates || { 1: '', 2: '', 3: '', 4: '' };
+      render();
+    });
+
     scoresCol.onSnapshot((snap) => {
       const map = {};
-      snap.docs.forEach((d) => { map[d.id] = (d.data().entries) || []; });
-      state.scoresByStudent = map;
+      snap.docs.forEach((d) => { map[d.id] = d.data(); });
+      state.scores = map;
       render();
     });
 
     return {
       mode: 'db',
       async init() {},
-      async addClass({ name, maxScore }) {
-        const ref = await classesCol.add({ name, maxScore, teacher: null, students: [], order: Date.now() });
-        currentClassId = ref.id;
+      async setCriteria(newList) {
+        await configDoc.set({ criteria: newList, occasionDates: state.occasionDates });
       },
-      async updateClass(classId, patch) {
-        await classesCol.doc(classId).update(patch);
+      async setOccasionDate(occasionNum, dateStr) {
+        const newDates = { ...state.occasionDates, [occasionNum]: dateStr };
+        await configDoc.set({ criteria: state.criteria, occasionDates: newDates });
       },
-      async deleteClass(classId) {
-        const cls = getClass(classId);
-        await Promise.all([
-          classesCol.doc(classId).delete(),
-          ...(cls ? cls.students.map((s) => scoresCol.doc(s.id).delete()) : []),
-        ]);
+      async setScore(studentId, occasionNum, criterionId, value) {
+        const current = state.scores[studentId] || { occasions: {} };
+        const occasion = current.occasions[occasionNum] || { scores: {} };
+        const newScores = { ...occasion.scores };
+        if (value === null) delete newScores[criterionId]; else newScores[criterionId] = value;
+        const newDoc = { occasions: { ...current.occasions, [occasionNum]: { scores: newScores } } };
+        await scoresCol.doc(studentId).set(newDoc);
       },
-      async addStudent(classId, { number, name }) {
-        const cls = getClass(classId);
-        await classesCol.doc(classId).update({ students: [...cls.students, { id: uid(), number, name }] });
-      },
-      async updateStudent(classId, studentId, patch) {
-        const cls = getClass(classId);
-        const students = cls.students.map((s) => (s.id === studentId ? { ...s, ...patch } : s));
-        await classesCol.doc(classId).update({ students });
-      },
-      async deleteStudent(classId, studentId) {
-        const cls = getClass(classId);
-        await Promise.all([
-          classesCol.doc(classId).update({ students: cls.students.filter((s) => s.id !== studentId) }),
-          scoresCol.doc(studentId).delete(),
-        ]);
-      },
-      async replaceStudents(classId, students) {
-        const cls = getClass(classId);
-        await Promise.all([
-          classesCol.doc(classId).update({ students }),
-          ...cls.students.map((s) => scoresCol.doc(s.id).delete()),
-        ]);
-      },
-      async addStudents(classId, students) {
-        const cls = getClass(classId);
-        await classesCol.doc(classId).update({ students: [...cls.students, ...students] });
-      },
-      async addScore(classId, studentId, entry) {
-        const entries = [...studentEntries(studentId), entry];
-        await scoresCol.doc(studentId).set({ classId, entries });
-      },
-      async deleteScore(classId, studentId, scoreId) {
-        const entries = studentEntries(studentId).filter((e) => e.id !== scoreId);
-        await scoresCol.doc(studentId).set({ classId, entries });
+      async updateStudentInfo(studentId, patch) {
+        const students = state.students.map((s) => (s.id === studentId ? { ...s, ...patch } : s));
+        await classDoc.update({ students });
       },
       async restoreAll(data) {
         const writes = [];
-        data.classes.forEach((c, i) => {
-          const { id, ...rest } = c;
-          writes.push(classesCol.doc(id || uid()).set({ teacher: null, order: i, ...rest }));
-        });
-        const byStudent = data.scoresByStudent || {};
+        if (Array.isArray(data.students)) {
+          writes.push(classDoc.update({
+            name: data.className || state.className,
+            teacher: data.teacher || null,
+            students: data.students,
+          }));
+        }
+        writes.push(configDoc.set({
+          criteria: Array.isArray(data.criteria) ? data.criteria : DEFAULT_CRITERIA,
+          occasionDates: data.occasionDates || { 1: '', 2: '', 3: '', 4: '' },
+        }));
+        const byStudent = data.scores || {};
         Object.keys(byStudent).forEach((studentId) => {
-          const entries = byStudent[studentId];
-          const owningClass = data.classes.find((c) => c.students.some((s) => s.id === studentId));
-          writes.push(scoresCol.doc(studentId).set({ classId: owningClass ? owningClass.id : null, entries }));
+          writes.push(scoresCol.doc(studentId).set(byStudent[studentId]));
         });
         await Promise.all(writes);
       },
@@ -729,102 +683,74 @@
 
   // ---------- Rendering ----------
   function render() {
-    renderClassTabs();
-    updateTodayBadge();
-    if (!currentClassId || !getClass(currentClassId)) currentClassId = state.classes[0]?.id ?? null;
+    renderOccasionTabs();
     loadingStateEl.classList.add('hidden');
-    if (!currentClassId) {
+    if (state.students.length === 0) {
       emptyStateEl.classList.remove('hidden');
-      classViewEl.classList.add('hidden');
+      mainViewEl.classList.add('hidden');
       return;
     }
     emptyStateEl.classList.add('hidden');
-    classViewEl.classList.remove('hidden');
-    renderClassView();
+    mainViewEl.classList.remove('hidden');
+    renderMainView();
   }
 
-  function renderClassTabs() {
-    classTabsEl.innerHTML = '';
-    state.classes.forEach((cls) => {
+  function renderOccasionTabs() {
+    occasionTabsEl.innerHTML = '';
+    OCCASIONS.forEach((occ) => {
       const btn = document.createElement('button');
-      btn.className = 'class-tab' + (cls.id === currentClassId ? ' active' : '');
-      btn.textContent = cls.name;
+      btn.className = 'occasion-tab' + (occ === currentOccasion ? ' active' : '');
+      const completeCount = state.students.filter((s) => occasionSummary(s.id, occ).answered === state.criteria.length && state.criteria.length > 0).length;
+      const check = state.students.length > 0 && completeCount === state.students.length ? '<span class="tab-check">✓</span>' : '';
+      btn.innerHTML = `${check}ครั้งที่ ${occ}`;
       btn.addEventListener('click', () => {
-        currentClassId = cls.id;
+        currentOccasion = occ;
         searchQuery = '';
         searchInput.value = '';
         render();
       });
-      classTabsEl.appendChild(btn);
+      occasionTabsEl.appendChild(btn);
     });
-    const addBtn = document.createElement('button');
-    addBtn.className = 'class-tab-add';
-    addBtn.textContent = '+ เพิ่มห้องเรียน';
-    addBtn.addEventListener('click', openAddClassModal);
-    classTabsEl.appendChild(addBtn);
   }
 
-  function scorePillClass(total, max) {
-    if (max <= 0) return '';
-    const ratio = total / max;
-    if (ratio < 0.4) return 'low';
-    if (ratio < 0.8) return 'mid';
-    return '';
-  }
-
-  function renderClassView() {
-    const cls = getClass(currentClassId);
-    if (!cls) return;
-    classNameEl.textContent = cls.name;
-    const teacherText = cls.teacher ? ` · ครูประจำชั้น ${cls.teacher}` : '';
-    classMetaEl.textContent = `${cls.students.length} คน · คะแนนเต็ม ${cls.maxScore}${teacherText}`;
+  function renderMainView() {
+    occasionTitleEl.textContent = `ครั้งที่ ${currentOccasion}`;
+    const completeCount = state.students.filter((s) => occasionSummary(s.id, currentOccasion).answered === state.criteria.length && state.criteria.length > 0).length;
+    const teacherText = state.teacher ? ` · ครูประจำชั้น ${state.teacher}` : '';
+    occasionMetaEl.textContent = `${state.students.length} คน · บันทึกครบแล้ว ${completeCount}/${state.students.length} คน · คะแนนเต็ม ${maxTotal()}${teacherText}`;
+    occasionDateInput.value = state.occasionDates[currentOccasion] || '';
 
     const q = searchQuery.trim().toLowerCase();
-    const filtered = cls.students.filter((s) => !q || s.number.toLowerCase().includes(q) || s.name.toLowerCase().includes(q));
+    const filtered = state.students.filter((s) => !q || s.number.toLowerCase().includes(q) || s.name.toLowerCase().includes(q));
     const sorted = sortStudents(filtered);
 
     studentRowsEl.innerHTML = '';
-    noStudentsEl.classList.toggle('hidden', cls.students.length !== 0);
-    noResultsEl.classList.toggle('hidden', !(cls.students.length > 0 && sorted.length === 0));
+    noResultsEl.classList.toggle('hidden', sorted.length !== 0);
 
     sorted.forEach((student) => {
-      const total = studentTotal(student.id);
-      const pct = cls.maxScore > 0 ? Math.max(0, Math.min(100, (total / cls.maxScore) * 100)) : 0;
-      const pillClass = scorePillClass(total, cls.maxScore);
+      const { total, answered, totalCriteria } = occasionSummary(student.id, currentOccasion);
+      const max = maxTotal();
+      const pct = max > 0 ? Math.max(0, Math.min(100, (total / max) * 100)) : 0;
+      const pillClass = answered === 0 ? 'unset' : scorePillClass(total, max);
+      const valueText = answered === 0 ? '—' : String(total);
+      const partialText = answered > 0 && answered < totalCriteria ? `<div class="card-partial">บันทึก ${answered}/${totalCriteria} ข้อ</div>` : '';
       const card = document.createElement('div');
       card.className = 'student-card';
       card.innerHTML = `
         <div class="card-top">
           <span class="card-number">${escapeHtml(student.number)}</span>
-          <button type="button" class="card-more" title="รายละเอียด/ประวัติ/แก้ไข">⋯</button>
         </div>
         <div class="card-name">${escapeHtml(student.name)}</div>
         <div class="card-score-row">
-          <button type="button" class="card-score-btn minus" data-delta="-1" aria-label="ลบ 1 คะแนน">−</button>
-          <span class="card-score-value ${pillClass}">${total}</span>
-          <button type="button" class="card-score-btn plus" data-delta="1" aria-label="เพิ่ม 1 คะแนน">+</button>
+          <span class="card-score-value ${pillClass}">${valueText}</span>
+          <span class="card-of">/ ${max}</span>
         </div>
         <div class="card-bar"><div class="card-bar-fill" style="width:${pct}%"></div></div>
-        <div class="card-of">/ ${cls.maxScore}</div>
+        ${partialText}
       `;
-      card.addEventListener('click', () => openStudentScoreModal(cls.id, student.id));
-      card.querySelector('.card-more').addEventListener('click', (e) => {
-        e.stopPropagation();
-        openStudentScoreModal(cls.id, student.id);
-      });
-      card.querySelectorAll('[data-delta]').forEach((btn) => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          quickAdjust(cls.id, student.id, parseFloat(btn.dataset.delta));
-        });
-      });
+      card.addEventListener('click', () => openStudentModal(student.id));
       studentRowsEl.appendChild(card);
     });
-  }
-
-  async function quickAdjust(classId, studentId, delta) {
-    await backend.addScore(classId, studentId, { id: uid(), points: delta, reason: '', date: todayStr(), createdAt: Date.now() });
-    showToast(delta > 0 ? `+${delta} คะแนน` : `${delta} คะแนน`);
   }
 
   // ---------- Modal ----------
@@ -841,80 +767,56 @@
   document.getElementById('modalClose').addEventListener('click', closeModal);
   modal.addEventListener('close', () => { modalBody.innerHTML = ''; modalFooter.innerHTML = ''; modalForm.onsubmit = null; });
 
-  // ---------- Class actions ----------
-  function openAddClassModal() {
-    openModal('เพิ่มห้องเรียน');
-    modalBody.innerHTML = `
-      <label class="field"><span>ชื่อห้องเรียน</span><input type="text" id="f-className" placeholder="เช่น ป.1/9" required autofocus></label>
-      <label class="field"><span>คะแนนเต็มจิตพิสัย</span><input type="number" id="f-maxScore" value="10" min="0" step="1" required></label>
-    `;
-    modalFooter.innerHTML = `<button type="button" class="btn btn-ghost" data-close>ยกเลิก</button><button type="submit" class="btn btn-primary">เพิ่มห้องเรียน</button>`;
-    modalFooter.querySelector('[data-close]').addEventListener('click', closeModal);
-    modalForm.onsubmit = async (e) => {
-      e.preventDefault();
-      const name = document.getElementById('f-className').value.trim();
-      const maxScore = parseFloat(document.getElementById('f-maxScore').value) || 0;
-      if (!name) return;
-      await backend.addClass({ name, maxScore });
-      closeModal();
-      showToast('เพิ่มห้องเรียนแล้ว');
-    };
-  }
-
-  function openEditClassModal(classId) {
-    const cls = getClass(classId);
-    if (!cls) return;
-    openModal('แก้ไขห้องเรียน');
-    modalBody.innerHTML = `
-      <label class="field"><span>ชื่อห้องเรียน</span><input type="text" id="f-className" value="${escapeHtml(cls.name)}" required autofocus></label>
-      <label class="field"><span>คะแนนเต็มจิตพิสัย</span><input type="number" id="f-maxScore" value="${cls.maxScore}" min="0" step="1" required></label>
-      <hr>
-      <p class="danger-zone-label">โซนอันตราย</p>
-      <button type="button" id="f-deleteClass" class="btn btn-danger">ลบห้องเรียนนี้ (ลบนักเรียนและคะแนนทั้งหมด)</button>
-    `;
-    modalFooter.innerHTML = `<button type="button" class="btn btn-ghost" data-close>ยกเลิก</button><button type="submit" class="btn btn-primary">บันทึก</button>`;
-    modalFooter.querySelector('[data-close]').addEventListener('click', closeModal);
-    modalBody.querySelector('#f-deleteClass').addEventListener('click', async () => {
-      if (!confirm(`ยืนยันลบห้อง "${cls.name}" พร้อมนักเรียนและคะแนนทั้งหมด? การกระทำนี้ไม่สามารถย้อนกลับได้`)) return;
-      await backend.deleteClass(classId);
-      if (currentClassId === classId) currentClassId = null;
-      closeModal();
-      showToast('ลบห้องเรียนแล้ว');
-    });
-    modalForm.onsubmit = async (e) => {
-      e.preventDefault();
-      const name = document.getElementById('f-className').value.trim() || cls.name;
-      const maxScore = parseFloat(document.getElementById('f-maxScore').value) || 0;
-      await backend.updateClass(classId, { name, maxScore });
-      closeModal();
-      showToast('บันทึกการแก้ไขแล้ว');
-    };
-  }
-
-  // ---------- Student actions ----------
-  function openAddStudentModal(classId) {
-    openModal('เพิ่มนักเรียน');
-    modalBody.innerHTML = `
-      <label class="field"><span>เลขที่</span><input type="text" id="f-number" required autofocus></label>
-      <label class="field"><span>ชื่อ-สกุล</span><input type="text" id="f-name" required></label>
-    `;
-    modalFooter.innerHTML = `<button type="button" class="btn btn-ghost" data-close>ยกเลิก</button><button type="submit" class="btn btn-primary">เพิ่ม</button>`;
-    modalFooter.querySelector('[data-close]').addEventListener('click', closeModal);
-    modalForm.onsubmit = async (e) => {
-      e.preventDefault();
-      const number = document.getElementById('f-number').value.trim();
-      const name = document.getElementById('f-name').value.trim();
-      if (!number || !name) return;
-      await backend.addStudent(classId, { number, name });
-      closeModal();
-      showToast('เพิ่มนักเรียนแล้ว');
-    };
-  }
-
-  function openEditStudentModal(classId, studentId) {
-    const student = getStudent(classId, studentId);
+  // ---------- Student scoring ----------
+  function openStudentModal(studentId) {
+    const student = getStudent(studentId);
     if (!student) return;
-    openModal('แก้ไขข้อมูลนักเรียน');
+    openModal(`${student.name} (เลขที่ ${student.number}) · ครั้งที่ ${currentOccasion}`);
+    renderStudentModalBody(studentId);
+    modalFooter.innerHTML = `
+      <button type="button" class="btn btn-ghost" data-edit style="margin-right:auto;">✏️ แก้ไขชื่อ-เลขที่</button>
+      <button type="button" class="btn btn-ghost" data-close>ปิด</button>
+    `;
+    modalFooter.querySelector('[data-close]').addEventListener('click', closeModal);
+    modalFooter.querySelector('[data-edit]').addEventListener('click', () => openEditStudentModal(studentId));
+    modalForm.onsubmit = null;
+  }
+
+  function renderStudentModalBody(studentId) {
+    const rec = state.scores[studentId]?.occasions?.[currentOccasion]?.scores || {};
+    const { total } = occasionSummary(studentId, currentOccasion);
+    const rows = state.criteria.map((c) => {
+      const val = rec[c.id];
+      return `
+        <div class="criterion-row">
+          <span class="criterion-label">${escapeHtml(c.label)}</span>
+          <div class="level-buttons">
+            ${[0, 1, 2].map((lv) => `<button type="button" class="level-btn ${val === lv ? 'active' : ''}" data-crit="${c.id}" data-value="${lv}">${lv}</button>`).join('')}
+          </div>
+        </div>
+      `;
+    }).join('');
+    modalBody.innerHTML = `
+      <div class="score-total-banner">คะแนนรวมครั้งที่ ${currentOccasion}: <strong>${total}</strong> / ${maxTotal()}</div>
+      ${state.criteria.length === 0
+        ? '<p class="empty-hint">ยังไม่มีหัวข้อประเมิน กดปุ่ม "⚙️ หัวข้อประเมิน" ที่ด้านบนเพื่อเพิ่ม</p>'
+        : rows}
+    `;
+    modalBody.querySelectorAll('[data-crit]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const critId = btn.dataset.crit;
+        const value = parseInt(btn.dataset.value, 10);
+        const current = rec[critId];
+        await backend.setScore(studentId, currentOccasion, critId, current === value ? null : value);
+        if (modal.open) renderStudentModalBody(studentId);
+      });
+    });
+  }
+
+  function openEditStudentModal(studentId) {
+    const student = getStudent(studentId);
+    if (!student) return;
+    openModal('แก้ไขชื่อ-เลขที่นักเรียน');
     modalBody.innerHTML = `
       <label class="field"><span>เลขที่</span><input type="text" id="f-number" value="${escapeHtml(student.number)}" required autofocus></label>
       <label class="field"><span>ชื่อ-สกุล</span><input type="text" id="f-name" value="${escapeHtml(student.name)}" required></label>
@@ -925,173 +827,50 @@
       e.preventDefault();
       const number = document.getElementById('f-number').value.trim() || student.number;
       const name = document.getElementById('f-name').value.trim() || student.name;
-      await backend.updateStudent(classId, studentId, { number, name });
+      await backend.updateStudentInfo(studentId, { number, name });
       closeModal();
       showToast('บันทึกการแก้ไขแล้ว');
     };
   }
 
-  async function deleteStudent(classId, studentId) {
-    const student = getStudent(classId, studentId);
-    if (!student) return false;
-    if (!confirm(`ยืนยันลบนักเรียน "${student.name}" พร้อมประวัติคะแนนทั้งหมด?`)) return false;
-    await backend.deleteStudent(classId, studentId);
-    showToast('ลบนักเรียนแล้ว');
-    return true;
-  }
-
-  function openImportStudentsModal(classId) {
-    openModal('นำเข้ารายชื่อนักเรียน');
-    modalBody.innerHTML = `
-      <p class="hint">วางรายชื่อ 1 คนต่อบรรทัด รูปแบบ: <code>เลขที่, ชื่อ-สกุล</code> (คั่นด้วยคอมมา แท็บ หรือเว้นวรรค เช่น จากการคัดลอกจาก Excel)</p>
-      <textarea id="f-importText" rows="10" placeholder="1, เด็กชายสมชาย ใจดี&#10;2, เด็กหญิงสมหญิง ดีใจ"></textarea>
-      <label class="field-inline"><input type="checkbox" id="f-replace"><span>แทนที่รายชื่อเดิมทั้งหมดในห้องนี้ (จะลบประวัติคะแนนเดิมของห้องนี้ด้วย)</span></label>
-    `;
-    modalFooter.innerHTML = `<button type="button" class="btn btn-ghost" data-close>ยกเลิก</button><button type="submit" class="btn btn-primary">นำเข้า</button>`;
-    modalFooter.querySelector('[data-close]').addEventListener('click', closeModal);
-    modalForm.onsubmit = async (e) => {
-      e.preventDefault();
-      const text = document.getElementById('f-importText').value;
-      const replace = document.getElementById('f-replace').checked;
-      const { students, skipped } = parseStudentList(text);
-      if (students.length === 0) { showToast('ไม่พบข้อมูลที่นำเข้าได้'); return; }
-      if (replace && !confirm('การแทนที่จะลบประวัติคะแนนเดิมทั้งหมดของห้องนี้ ยืนยันหรือไม่?')) return;
-      if (replace) {
-        await backend.replaceStudents(classId, students);
-      } else {
-        const cls = getClass(classId);
-        const existingNumbers = new Set(cls.students.map((s) => s.number));
-        await backend.addStudents(classId, students.filter((s) => !existingNumbers.has(s.number)));
-      }
-      closeModal();
-      showToast(`นำเข้าสำเร็จ ${students.length} คน${skipped ? ` (ข้าม ${skipped} บรรทัดที่อ่านไม่ได้)` : ''}`);
-    };
-  }
-
-  function parseStudentList(text) {
-    const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
-    const students = [];
-    let skipped = 0;
-    for (const line of lines) {
-      let parts;
-      if (line.includes('\t')) parts = line.split('\t');
-      else if (line.includes(',')) parts = line.split(',');
-      else { const m = line.match(/^(\S+)\s+(.+)$/); parts = m ? [m[1], m[2]] : null; }
-      if (!parts) { skipped++; continue; }
-      const number = (parts[0] || '').trim();
-      const name = parts.slice(1).join(' ').replace(/\s+/g, ' ').trim();
-      if (!number || !name) { skipped++; continue; }
-      students.push({ id: uid(), number, name });
-    }
-    return { students, skipped };
-  }
-
-  // ---------- Score actions ----------
-  function openStudentScoreModal(classId, studentId) {
-    const student = getStudent(classId, studentId);
-    const cls = getClass(classId);
-    if (!student || !cls) return;
-    openModal(`${student.name} (เลขที่ ${student.number})`);
-    renderScoreModalBody(classId, studentId);
-    modalFooter.innerHTML = `
-      <div style="display:flex;gap:8px;margin-right:auto;">
-        <button type="button" class="btn btn-ghost" data-edit>✏️ แก้ไขข้อมูล</button>
-        <button type="button" class="btn btn-danger" data-delete-student>🗑️ ลบนักเรียน</button>
-      </div>
-      <button type="button" class="btn btn-ghost" data-close>ปิด</button>
-    `;
-    modalFooter.querySelector('[data-close]').addEventListener('click', closeModal);
-    modalFooter.querySelector('[data-edit]').addEventListener('click', () => {
-      openEditStudentModal(classId, studentId);
-    });
-    modalFooter.querySelector('[data-delete-student]').addEventListener('click', async () => {
-      const deleted = await deleteStudent(classId, studentId);
-      if (deleted) closeModal();
-    });
-    modalForm.onsubmit = async (e) => {
-      e.preventDefault();
-      const points = parseFloat(document.getElementById('f-points').value);
-      if (Number.isNaN(points)) return;
-      const reason = document.getElementById('f-reason').value.trim();
-      const date = document.getElementById('f-date').value || todayStr();
-      await backend.addScore(classId, studentId, { id: uid(), points, reason, date, createdAt: Date.now() });
-      if (modal.open) renderScoreModalBody(classId, studentId);
-      showToast('บันทึกคะแนนแล้ว');
-    };
-  }
-
-  function renderScoreModalBody(classId, studentId) {
-    const cls = getClass(classId);
-    const total = studentTotal(studentId);
-    const history = [...studentEntries(studentId)].sort((a, b) => b.createdAt - a.createdAt);
-    modalBody.innerHTML = `
-      <div class="score-total-banner">คะแนนรวมปัจจุบัน: <strong class="${total < 0 ? 'negative' : ''}">${total}</strong> / ${cls.maxScore}</div>
-      <div class="score-form">
-        <label class="field"><span>คะแนน (ใส่ค่าลบเพื่อหักคะแนน)</span><input type="number" id="f-points" step="any" value="1" required autofocus></label>
-        <div class="preset-buttons">${[1, 2, 5, -1, -2, -5].map((v) => `<button type="button" class="btn-small" data-preset="${v}">${v > 0 ? '+' + v : v}</button>`).join('')}</div>
-        <label class="field"><span>เหตุผล/หมายเหตุ</span><input type="text" id="f-reason" placeholder="เช่น ช่วยเหลืองาน, มาสาย"></label>
-        <label class="field"><span>วันที่</span><input type="date" id="f-date" value="${todayStr()}"></label>
-        <button type="submit" class="btn btn-primary">บันทึกคะแนน</button>
-      </div>
-      <h4 class="history-heading">ประวัติคะแนน (${history.length})</h4>
-      <div class="history-list">
-        ${history.length === 0 ? '<p class="empty-hint">ยังไม่มีประวัติคะแนน</p>' : history.map((entry) => `
-          <div class="history-row" data-id="${entry.id}">
-            <div class="history-info">
-              <span class="history-points ${entry.points < 0 ? 'negative' : ''}">${entry.points > 0 ? '+' : ''}${entry.points}</span>
-              <span class="history-reason">${escapeHtml(entry.reason || '-')}</span>
-              <span class="history-date">${formatDateTh(entry.date)}</span>
-            </div>
-            <button type="button" class="btn-icon" data-delete="${entry.id}" title="ลบรายการนี้">🗑️</button>
-          </div>
-        `).join('')}
-      </div>
-    `;
-    modalBody.querySelectorAll('[data-preset]').forEach((btn) => {
-      btn.addEventListener('click', () => { document.getElementById('f-points').value = btn.dataset.preset; });
-    });
-    modalBody.querySelectorAll('[data-delete]').forEach((btn) => {
-      btn.addEventListener('click', async () => {
-        if (!confirm('ยืนยันลบรายการคะแนนนี้?')) return;
-        await backend.deleteScore(classId, studentId, btn.dataset.delete);
-        if (modal.open) renderScoreModalBody(classId, studentId);
-        showToast('ลบรายการคะแนนแล้ว');
-      });
-    });
-  }
-
-  function openTodayActivityModal() {
-    const rows = todaysEntries();
-    const plus = rows.filter((r) => r.points > 0).reduce((sum, r) => sum + r.points, 0);
-    const minus = rows.filter((r) => r.points < 0).reduce((sum, r) => sum + r.points, 0);
-    openModal(`กิจกรรมวันนี้ · ${formatDateTh(todayStr())}`);
-    modalBody.innerHTML = `
-      <div class="score-total-banner">รวม ${rows.length} รายการ · ให้คะแนนรวม <strong>+${plus}</strong> · หักคะแนนรวม <strong class="negative">${minus}</strong></div>
-      <div class="history-list">
-        ${rows.length === 0 ? '<p class="empty-hint">วันนี้ยังไม่มีการให้หรือลบคะแนน</p>' : rows.map((r) => `
-          <div class="history-row" data-class="${r.classId}" data-student="${r.studentId}" style="cursor:pointer;">
-            <div class="history-info">
-              <span class="history-points ${r.points < 0 ? 'negative' : ''}">${r.points > 0 ? '+' : ''}${r.points}</span>
-              <span class="history-reason">${escapeHtml(r.studentName)} · ${escapeHtml(r.className)}${r.reason ? ' · ' + escapeHtml(r.reason) : ''}</span>
-              <span class="history-date">${new Date(r.createdAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}</span>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    `;
+  // ---------- Criteria settings ----------
+  function openCriteriaModal() {
+    openModal('ตั้งค่าหัวข้อประเมิน (0-2 คะแนนต่อข้อ)');
+    renderCriteriaBody();
     modalFooter.innerHTML = `<button type="button" class="btn btn-ghost" data-close>ปิด</button>`;
     modalFooter.querySelector('[data-close]').addEventListener('click', closeModal);
     modalForm.onsubmit = null;
-    modalBody.querySelectorAll('[data-student]').forEach((row) => {
-      row.addEventListener('click', () => {
-        const classId = row.dataset.class;
-        const studentId = row.dataset.student;
-        currentClassId = classId;
-        searchQuery = '';
-        searchInput.value = '';
-        render();
-        openStudentScoreModal(classId, studentId);
+  }
+
+  function renderCriteriaBody() {
+    modalBody.innerHTML = `
+      <p class="hint">5 หัวข้อด้านล่างเป็นตัวอย่างเริ่มต้น แก้ไขชื่อ เพิ่ม หรือลบให้ตรงกับเครื่องมือวิจัยของคุณได้ทุกเมื่อ แนะนำให้ตั้งค่าให้ครบก่อนเริ่มบันทึกครั้งที่ 1 เพื่อให้ใช้เกณฑ์เดียวกันทั้ง 4 ครั้ง</p>
+      <div id="criteriaList"></div>
+      <button type="button" id="btnAddCriterion" class="btn btn-secondary">+ เพิ่มหัวข้อ</button>
+    `;
+    const listEl = modalBody.querySelector('#criteriaList');
+    state.criteria.forEach((c) => {
+      const row = document.createElement('div');
+      row.className = 'criteria-list-row';
+      row.innerHTML = `
+        <input type="text" class="criteria-input" value="${escapeHtml(c.label)}">
+        <button type="button" class="btn-icon" title="ลบหัวข้อนี้">🗑️</button>
+      `;
+      const input = row.querySelector('input');
+      input.addEventListener('change', async () => {
+        const newLabel = input.value.trim() || c.label;
+        await backend.setCriteria(state.criteria.map((x) => (x.id === c.id ? { ...x, label: newLabel } : x)));
       });
+      row.querySelector('button').addEventListener('click', async () => {
+        if (!confirm(`ยืนยันลบหัวข้อ "${c.label}"? คะแนนที่เคยบันทึกในหัวข้อนี้จะไม่แสดงอีกต่อไป`)) return;
+        await backend.setCriteria(state.criteria.filter((x) => x.id !== c.id));
+        renderCriteriaBody();
+      });
+      listEl.appendChild(row);
+    });
+    modalBody.querySelector('#btnAddCriterion').addEventListener('click', async () => {
+      await backend.setCriteria([...state.criteria, { id: uid(), label: 'หัวข้อใหม่' }]);
+      renderCriteriaBody();
     });
   }
 
@@ -1115,8 +894,11 @@
   }
 
   async function exportBackup() {
-    const data = { classes: state.classes, scoresByStudent: state.scoresByStudent };
-    await saveFile(`psychomotor-scores-backup-${todayStr()}.json`, JSON.stringify(data, null, 2), 'application/json');
+    const data = {
+      className: state.className, teacher: state.teacher, students: state.students,
+      criteria: state.criteria, occasionDates: state.occasionDates, scores: state.scores,
+    };
+    await saveFile(`วิจัยจิตพิสัย-ป1-3-backup-${todayStr()}.json`, JSON.stringify(data, null, 2), 'application/json');
   }
 
   function importBackup(file) {
@@ -1124,8 +906,8 @@
     reader.onload = async () => {
       try {
         const parsed = JSON.parse(String(reader.result));
-        if (!Array.isArray(parsed.classes)) throw new Error('invalid');
-        if (!confirm('การกู้คืนจะเพิ่ม/อัปเดตข้อมูลจากไฟล์นี้เข้าไปในข้อมูลปัจจุบัน ยืนยันหรือไม่?')) return;
+        if (!Array.isArray(parsed.students)) throw new Error('invalid');
+        if (!confirm('การกู้คืนจะแทนที่ข้อมูลปัจจุบันทั้งหมด (รายชื่อ หัวข้อประเมิน และคะแนนทุกครั้ง) ยืนยันหรือไม่?')) return;
         await backend.restoreAll(parsed);
         showToast('กู้คืนข้อมูลสำเร็จ');
       } catch { alert('ไฟล์ไม่ถูกต้อง ไม่สามารถกู้คืนข้อมูลได้'); }
@@ -1133,46 +915,44 @@
     reader.readAsText(file);
   }
 
-  async function exportCsv(classId) {
-    const cls = getClass(classId);
-    if (!cls) return;
-    const rows = [['เลขที่', 'ชื่อ-สกุล', 'คะแนนรวม', 'คะแนนเต็ม']];
-    sortStudents(cls.students).forEach((s) => rows.push([s.number, s.name, String(studentTotal(s.id)), String(cls.maxScore)]));
+  async function exportCsv() {
+    const header = ['เลขที่', 'ชื่อ-สกุล'];
+    OCCASIONS.forEach((occ) => {
+      state.criteria.forEach((c) => header.push(`ครั้งที่${occ}_${c.label}`));
+      header.push(`ครั้งที่${occ}_รวม`);
+    });
+    const rows = [header];
+    sortStudents(state.students).forEach((s) => {
+      const row = [s.number, s.name];
+      OCCASIONS.forEach((occ) => {
+        const rec = state.scores[s.id]?.occasions?.[occ]?.scores || {};
+        let total = 0;
+        state.criteria.forEach((c) => {
+          const v = rec[c.id];
+          row.push(typeof v === 'number' ? String(v) : '');
+          if (typeof v === 'number') total += v;
+        });
+        row.push(String(total));
+      });
+      rows.push(row);
+    });
     const csv = rows.map((r) => r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\r\n');
-    await saveFile(`${cls.name}-คะแนนจิตพิสัย.csv`, '﻿' + csv, 'text/csv;charset=utf-8;');
-  }
-
-  function printReport(classId) {
-    const cls = getClass(classId);
-    if (!cls) return;
-    let printArea = document.getElementById('printArea');
-    if (!printArea) { printArea = document.createElement('div'); printArea.id = 'printArea'; document.body.appendChild(printArea); }
-    printArea.innerHTML = `
-      <h1>รายงานคะแนนจิตพิสัย: ${escapeHtml(cls.name)}</h1>
-      <p>คะแนนเต็ม ${cls.maxScore} · วันที่พิมพ์ ${formatDateTh(todayStr())}</p>
-      <table>
-        <thead><tr><th>เลขที่</th><th>ชื่อ-สกุล</th><th>คะแนนรวม</th></tr></thead>
-        <tbody>${sortStudents(cls.students).map((s) => `<tr><td>${escapeHtml(s.number)}</td><td>${escapeHtml(s.name)}</td><td>${studentTotal(s.id)}</td></tr>`).join('')}</tbody>
-      </table>
-    `;
-    window.print();
+    await saveFile(`ป1-3-คะแนนจิตพิสัย-วิจัย-${todayStr()}.csv`, '﻿' + csv, 'text/csv;charset=utf-8;');
   }
 
   // ---------- Wire up global buttons ----------
-  document.getElementById('btnTodayActivity').addEventListener('click', openTodayActivityModal);
-  document.getElementById('btnAddClassEmpty').addEventListener('click', openAddClassModal);
-  document.getElementById('btnEditClass').addEventListener('click', () => openEditClassModal(currentClassId));
-  document.getElementById('btnAddStudent').addEventListener('click', () => openAddStudentModal(currentClassId));
-  document.getElementById('btnImportStudents').addEventListener('click', () => openImportStudentsModal(currentClassId));
-  document.getElementById('btnExportCsv').addEventListener('click', () => exportCsv(currentClassId));
-  document.getElementById('btnPrint').addEventListener('click', () => printReport(currentClassId));
+  document.getElementById('btnCriteria').addEventListener('click', openCriteriaModal);
+  document.getElementById('btnExportCsv').addEventListener('click', exportCsv);
   document.getElementById('btnExport').addEventListener('click', exportBackup);
   document.getElementById('importFile').addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) importBackup(file);
     e.target.value = '';
   });
-  searchInput.addEventListener('input', (e) => { searchQuery = e.target.value; renderClassView(); });
+  searchInput.addEventListener('input', (e) => { searchQuery = e.target.value; renderMainView(); });
+  occasionDateInput.addEventListener('change', async (e) => {
+    await backend.setOccasionDate(currentOccasion, e.target.value);
+  });
 
   // ---------- Boot ----------
   (async () => {
