@@ -440,7 +440,7 @@
             <span>วันที่บันทึก</span>
             <input type="date" id="occasionDateInput">
           </label>
-          <input type="search" id="searchInput" placeholder="ค้นหาเลขที่หรือชื่อ...">
+          <input type="search" id="searchInput" placeholder="ค้นหาเลขที่หรือรหัสประจำตัว...">
         </div>
       </div>
       <label class="field">
@@ -576,7 +576,7 @@
     return [...students].sort((a, b) => {
       const na = parseFloat(a.number), nb = parseFloat(b.number);
       if (!Number.isNaN(na) && !Number.isNaN(nb) && na !== nb) return na - nb;
-      return a.number.localeCompare(b.number, 'th') || a.name.localeCompare(b.name, 'th');
+      return a.number.localeCompare(b.number, 'th') || String(a.code || '').localeCompare(String(b.code || ''), 'th');
     });
   }
 
@@ -838,7 +838,7 @@
     occasionNoteInput.value = state.occasionNotes[currentOccasion] || '';
 
     const q = searchQuery.trim().toLowerCase();
-    const filtered = state.students.filter((s) => !q || s.number.toLowerCase().includes(q) || s.name.toLowerCase().includes(q));
+    const filtered = state.students.filter((s) => !q || s.number.toLowerCase().includes(q) || String(s.code || '').toLowerCase().includes(q));
     const sorted = sortStudents(filtered);
 
     studentRowsEl.innerHTML = '';
@@ -858,7 +858,7 @@
           <span class="card-number">${escapeHtml(student.number)}</span>
           ${hasNote ? '<span title="มีบันทึกพฤติกรรมครั้งนี้">📝</span>' : ''}
         </div>
-        <div class="card-name">${escapeHtml(student.name)}</div>
+        <div class="card-name">รหัส ${escapeHtml(student.code || '-')}</div>
         <div class="card-score-row">
           <span class="card-score-value ${pillClass}">${total}</span>
           <span class="card-of">/ ${max}</span>
@@ -890,10 +890,10 @@
   function openStudentModal(studentId) {
     const student = getStudent(studentId);
     if (!student) return;
-    openModal(`${student.name} (เลขที่ ${student.number}) · ครั้งที่ ${currentOccasion}`);
+    openModal(`เลขที่ ${student.number} · รหัส ${student.code || '-'} · ครั้งที่ ${currentOccasion}`);
     renderStudentModalBody(studentId);
     modalFooter.innerHTML = `
-      <button type="button" class="btn btn-ghost" data-edit style="margin-right:auto;">✏️ แก้ไขชื่อ-เลขที่</button>
+      <button type="button" class="btn btn-ghost" data-edit style="margin-right:auto;">✏️ แก้ไขเลขที่-รหัส</button>
       <button type="button" class="btn btn-ghost" data-close>ปิด</button>
     `;
     modalFooter.querySelector('[data-close]').addEventListener('click', closeModal);
@@ -954,18 +954,18 @@
   function openEditStudentModal(studentId) {
     const student = getStudent(studentId);
     if (!student) return;
-    openModal('แก้ไขชื่อ-เลขที่นักเรียน');
+    openModal('แก้ไขเลขที่-รหัสประจำตัวนักเรียน');
     modalBody.innerHTML = `
       <label class="field"><span>เลขที่</span><input type="text" id="f-number" value="${escapeHtml(student.number)}" required autofocus></label>
-      <label class="field"><span>ชื่อ-สกุล</span><input type="text" id="f-name" value="${escapeHtml(student.name)}" required></label>
+      <label class="field"><span>รหัสประจำตัวนักเรียน</span><input type="text" id="f-code" value="${escapeHtml(student.code || '')}" required></label>
     `;
     modalFooter.innerHTML = `<button type="button" class="btn btn-ghost" data-close>ยกเลิก</button><button type="submit" class="btn btn-primary">บันทึก</button>`;
     modalFooter.querySelector('[data-close]').addEventListener('click', closeModal);
     modalForm.onsubmit = async (e) => {
       e.preventDefault();
       const number = document.getElementById('f-number').value.trim() || student.number;
-      const name = document.getElementById('f-name').value.trim() || student.name;
-      await backend.updateStudentInfo(studentId, { number, name });
+      const code = document.getElementById('f-code').value.trim() || student.code;
+      await backend.updateStudentInfo(studentId, { number, code });
       closeModal();
       showToast('บันทึกการแก้ไขแล้ว');
     };
@@ -1035,7 +1035,7 @@
       return `
         <tr>
           <td>${escapeHtml(s.number)}</td>
-          <td>${escapeHtml(s.name)}</td>
+          <td>${escapeHtml(s.code || '-')}</td>
           ${totals.map((t) => `<td class="num">${t}</td>`).join('')}
           <td class="num"><strong>${finalScore.toFixed(1)}</strong></td>
           <td>${verdict}</td>
@@ -1054,7 +1054,7 @@
         <table class="summary-table">
           <thead>
             <tr>
-              <th>เลขที่</th><th>ชื่อ-สกุล</th>
+              <th>เลขที่</th><th>รหัสประจำตัวนักเรียน</th>
               ${OCCASIONS.map((occ) => `<th>ครั้งที่ ${occ}</th>`).join('')}
               <th>คะแนนสุทธิ /10</th><th>ระดับ</th><th>ผล</th><th>แนวโน้ม</th>
             </tr>
@@ -1111,7 +1111,7 @@
   }
 
   async function exportCsv() {
-    const header = ['เลขที่', 'ชื่อ-สกุล'];
+    const header = ['เลขที่', 'รหัสประจำตัวนักเรียน'];
     OCCASIONS.forEach((occ) => {
       state.criteria.forEach((c) => header.push(`ครั้งที่${occ}_${c.label}`));
       header.push(`ครั้งที่${occ}_รวม`);
@@ -1120,7 +1120,7 @@
     header.push('คะแนนสุทธิ_เต็ม10', 'ระดับสุทธิ', 'ผลสุทธิ', 'แนวโน้ม');
     const rows = [header];
     sortStudents(state.students).forEach((s) => {
-      const row = [s.number, s.name];
+      const row = [s.number, s.code || ''];
       OCCASIONS.forEach((occ) => {
         const occasionRec = state.scores[s.id]?.occasions?.[occ] || {};
         const rec = occasionRec.scores || {};
