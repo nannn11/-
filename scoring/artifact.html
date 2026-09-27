@@ -335,9 +335,10 @@
 
   .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; font-size: 0.88rem; }
   .field span { color: var(--muted); font-size: 0.8rem; }
-  .field input {
+  .field input, .field textarea {
     font-family: inherit; font-size: 0.94rem; padding: 9px 11px; border-radius: 8px;
     border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+    resize: vertical;
   }
   .hint { font-size: 0.84rem; color: var(--muted); margin: 0 0 12px; }
 
@@ -416,7 +417,11 @@
           <input type="search" id="searchInput" placeholder="ค้นหาเลขที่หรือชื่อ...">
         </div>
       </div>
-      <p class="hint">แตะที่กล่องนักเรียนเพื่อกรอกคะแนนแต่ละหัวข้อของครั้งนี้ (0-2 คะแนนต่อข้อ)</p>
+      <label class="field">
+        <span id="occasionNoteLabel">รายละเอียดการเรียนการสอน/กิจกรรมในคาบนี้</span>
+        <textarea id="occasionNoteInput" rows="3" placeholder="เช่น เนื้อหาที่สอน กิจกรรมที่ทำ บริบทของคาบเก็บข้อมูลครั้งนี้..."></textarea>
+      </label>
+      <p class="hint">แตะที่กล่องนักเรียนเพื่อกรอกคะแนนแต่ละหัวข้อและบันทึกพฤติกรรมของครั้งนี้ (0-2 คะแนนต่อข้อ)</p>
       <div id="studentRows" class="roster-grid"></div>
       <p id="noResults" class="empty-hint hidden">ไม่พบนักเรียนที่ค้นหา</p>
     </section>
@@ -458,6 +463,7 @@
     students: [],
     criteria: [],
     occasionDates: { 1: '', 2: '', 3: '', 4: '' },
+    occasionNotes: { 1: '', 2: '', 3: '', 4: '' },
     scores: {},
   };
   let currentOccasion = 1;
@@ -476,6 +482,8 @@
   const occasionTitleEl = document.getElementById('occasionTitle');
   const occasionMetaEl = document.getElementById('occasionMeta');
   const occasionDateInput = document.getElementById('occasionDateInput');
+  const occasionNoteInput = document.getElementById('occasionNoteInput');
+  const occasionNoteLabel = document.getElementById('occasionNoteLabel');
   const studentRowsEl = document.getElementById('studentRows');
   const noResultsEl = document.getElementById('noResults');
   const searchInput = document.getElementById('searchInput');
@@ -552,7 +560,8 @@
     function persist() {
       localStorage.setItem(LOCAL_KEY, JSON.stringify({
         className: state.className, teacher: state.teacher, students: state.students,
-        criteria: state.criteria, occasionDates: state.occasionDates, scores: state.scores,
+        criteria: state.criteria, occasionDates: state.occasionDates, occasionNotes: state.occasionNotes,
+        scores: state.scores,
       }));
     }
     return {
@@ -565,6 +574,7 @@
           state.students = Array.isArray(loaded.students) ? loaded.students : [];
           state.criteria = Array.isArray(loaded.criteria) ? loaded.criteria : DEFAULT_CRITERIA;
           state.occasionDates = loaded.occasionDates || { 1: '', 2: '', 3: '', 4: '' };
+          state.occasionNotes = loaded.occasionNotes || { 1: '', 2: '', 3: '', 4: '' };
           state.scores = loaded.scores || {};
         } else {
           state.criteria = DEFAULT_CRITERIA;
@@ -574,15 +584,25 @@
       async setCriteria(newList) { state.criteria = newList; persist(); render(); },
       async setOccasionDate(occasionNum, dateStr) {
         state.occasionDates = { ...state.occasionDates, [occasionNum]: dateStr };
-        persist(); render();
+        persist();
       },
       async setScore(studentId, occasionNum, criterionId, value) {
         const current = state.scores[studentId] || { occasions: {} };
         const occasion = current.occasions[occasionNum] || { scores: {} };
         const newScores = { ...occasion.scores };
         if (value === null) delete newScores[criterionId]; else newScores[criterionId] = value;
-        state.scores = { ...state.scores, [studentId]: { occasions: { ...current.occasions, [occasionNum]: { scores: newScores } } } };
+        state.scores = { ...state.scores, [studentId]: { occasions: { ...current.occasions, [occasionNum]: { ...occasion, scores: newScores } } } };
         persist(); render();
+      },
+      async setStudentNote(studentId, occasionNum, text) {
+        const current = state.scores[studentId] || { occasions: {} };
+        const occasion = current.occasions[occasionNum] || { scores: {} };
+        state.scores = { ...state.scores, [studentId]: { occasions: { ...current.occasions, [occasionNum]: { ...occasion, note: text } } } };
+        persist(); render();
+      },
+      async setOccasionNote(occasionNum, text) {
+        state.occasionNotes = { ...state.occasionNotes, [occasionNum]: text };
+        persist();
       },
       async updateStudentInfo(studentId, patch) {
         state.students = state.students.map((s) => (s.id === studentId ? { ...s, ...patch } : s));
@@ -594,6 +614,7 @@
         state.students = Array.isArray(data.students) ? data.students : [];
         state.criteria = Array.isArray(data.criteria) ? data.criteria : DEFAULT_CRITERIA;
         state.occasionDates = data.occasionDates || { 1: '', 2: '', 3: '', 4: '' };
+        state.occasionNotes = data.occasionNotes || { 1: '', 2: '', 3: '', 4: '' };
         state.scores = data.scores || {};
         persist(); render();
       },
@@ -620,13 +641,18 @@
       if (!snap.exists) {
         if (!configSeeded) {
           configSeeded = true;
-          configDoc.set({ criteria: DEFAULT_CRITERIA, occasionDates: { 1: '', 2: '', 3: '', 4: '' } });
+          configDoc.set({
+            criteria: DEFAULT_CRITERIA,
+            occasionDates: { 1: '', 2: '', 3: '', 4: '' },
+            occasionNotes: { 1: '', 2: '', 3: '', 4: '' },
+          });
         }
         return;
       }
       const d = snap.data();
       state.criteria = Array.isArray(d.criteria) ? d.criteria : DEFAULT_CRITERIA;
       state.occasionDates = d.occasionDates || { 1: '', 2: '', 3: '', 4: '' };
+      state.occasionNotes = d.occasionNotes || { 1: '', 2: '', 3: '', 4: '' };
       render();
     });
 
@@ -641,19 +667,29 @@
       mode: 'db',
       async init() {},
       async setCriteria(newList) {
-        await configDoc.set({ criteria: newList, occasionDates: state.occasionDates });
+        await configDoc.set({ criteria: newList, occasionDates: state.occasionDates, occasionNotes: state.occasionNotes });
       },
       async setOccasionDate(occasionNum, dateStr) {
         const newDates = { ...state.occasionDates, [occasionNum]: dateStr };
-        await configDoc.set({ criteria: state.criteria, occasionDates: newDates });
+        await configDoc.set({ criteria: state.criteria, occasionDates: newDates, occasionNotes: state.occasionNotes });
       },
       async setScore(studentId, occasionNum, criterionId, value) {
         const current = state.scores[studentId] || { occasions: {} };
         const occasion = current.occasions[occasionNum] || { scores: {} };
         const newScores = { ...occasion.scores };
         if (value === null) delete newScores[criterionId]; else newScores[criterionId] = value;
-        const newDoc = { occasions: { ...current.occasions, [occasionNum]: { scores: newScores } } };
+        const newDoc = { occasions: { ...current.occasions, [occasionNum]: { ...occasion, scores: newScores } } };
         await scoresCol.doc(studentId).set(newDoc);
+      },
+      async setStudentNote(studentId, occasionNum, text) {
+        const current = state.scores[studentId] || { occasions: {} };
+        const occasion = current.occasions[occasionNum] || { scores: {} };
+        const newDoc = { occasions: { ...current.occasions, [occasionNum]: { ...occasion, note: text } } };
+        await scoresCol.doc(studentId).set(newDoc);
+      },
+      async setOccasionNote(occasionNum, text) {
+        const newNotes = { ...state.occasionNotes, [occasionNum]: text };
+        await configDoc.set({ criteria: state.criteria, occasionDates: state.occasionDates, occasionNotes: newNotes });
       },
       async updateStudentInfo(studentId, patch) {
         const students = state.students.map((s) => (s.id === studentId ? { ...s, ...patch } : s));
@@ -671,6 +707,7 @@
         writes.push(configDoc.set({
           criteria: Array.isArray(data.criteria) ? data.criteria : DEFAULT_CRITERIA,
           occasionDates: data.occasionDates || { 1: '', 2: '', 3: '', 4: '' },
+          occasionNotes: data.occasionNotes || { 1: '', 2: '', 3: '', 4: '' },
         }));
         const byStudent = data.scores || {};
         Object.keys(byStudent).forEach((studentId) => {
@@ -695,21 +732,28 @@
     renderMainView();
   }
 
+  let occasionTabButtons = null;
   function renderOccasionTabs() {
-    occasionTabsEl.innerHTML = '';
-    OCCASIONS.forEach((occ) => {
-      const btn = document.createElement('button');
+    if (!occasionTabButtons) {
+      occasionTabButtons = OCCASIONS.map((occ) => {
+        const btn = document.createElement('button');
+        btn.className = 'occasion-tab';
+        btn.addEventListener('click', () => {
+          currentOccasion = occ;
+          searchQuery = '';
+          searchInput.value = '';
+          render();
+        });
+        occasionTabsEl.appendChild(btn);
+        return btn;
+      });
+    }
+    OCCASIONS.forEach((occ, i) => {
+      const btn = occasionTabButtons[i];
       btn.className = 'occasion-tab' + (occ === currentOccasion ? ' active' : '');
       const completeCount = state.students.filter((s) => occasionSummary(s.id, occ).answered === state.criteria.length && state.criteria.length > 0).length;
       const check = state.students.length > 0 && completeCount === state.students.length ? '<span class="tab-check">✓</span>' : '';
       btn.innerHTML = `${check}ครั้งที่ ${occ}`;
-      btn.addEventListener('click', () => {
-        currentOccasion = occ;
-        searchQuery = '';
-        searchInput.value = '';
-        render();
-      });
-      occasionTabsEl.appendChild(btn);
     });
   }
 
@@ -719,6 +763,8 @@
     const teacherText = state.teacher ? ` · ครูประจำชั้น ${state.teacher}` : '';
     occasionMetaEl.textContent = `${state.students.length} คน · บันทึกครบแล้ว ${completeCount}/${state.students.length} คน · คะแนนเต็ม ${maxTotal()}${teacherText}`;
     occasionDateInput.value = state.occasionDates[currentOccasion] || '';
+    occasionNoteLabel.textContent = `รายละเอียดการเรียนการสอน/กิจกรรมในคาบนี้ (ครั้งที่ ${currentOccasion})`;
+    occasionNoteInput.value = state.occasionNotes[currentOccasion] || '';
 
     const q = searchQuery.trim().toLowerCase();
     const filtered = state.students.filter((s) => !q || s.number.toLowerCase().includes(q) || s.name.toLowerCase().includes(q));
@@ -734,11 +780,13 @@
       const pillClass = answered === 0 ? 'unset' : scorePillClass(total, max);
       const valueText = answered === 0 ? '—' : String(total);
       const partialText = answered > 0 && answered < totalCriteria ? `<div class="card-partial">บันทึก ${answered}/${totalCriteria} ข้อ</div>` : '';
+      const hasNote = !!(state.scores[student.id]?.occasions?.[currentOccasion]?.note);
       const card = document.createElement('div');
       card.className = 'student-card';
       card.innerHTML = `
         <div class="card-top">
           <span class="card-number">${escapeHtml(student.number)}</span>
+          ${hasNote ? '<span title="มีบันทึกพฤติกรรมครั้งนี้">📝</span>' : ''}
         </div>
         <div class="card-name">${escapeHtml(student.name)}</div>
         <div class="card-score-row">
@@ -783,7 +831,9 @@
   }
 
   function renderStudentModalBody(studentId) {
-    const rec = state.scores[studentId]?.occasions?.[currentOccasion]?.scores || {};
+    const occasionRec = state.scores[studentId]?.occasions?.[currentOccasion] || {};
+    const rec = occasionRec.scores || {};
+    const noteVal = occasionRec.note || '';
     const { total } = occasionSummary(studentId, currentOccasion);
     const rows = state.criteria.map((c) => {
       const val = rec[c.id];
@@ -801,6 +851,10 @@
       ${state.criteria.length === 0
         ? '<p class="empty-hint">ยังไม่มีหัวข้อประเมิน กดปุ่ม "⚙️ หัวข้อประเมิน" ที่ด้านบนเพื่อเพิ่ม</p>'
         : rows}
+      <label class="field" style="margin-top:10px;">
+        <span>บันทึกพฤติกรรม (ครั้งที่ ${currentOccasion})</span>
+        <textarea id="f-student-note" rows="3" placeholder="สังเกตพฤติกรรมเพิ่มเติม เหตุการณ์เฉพาะ ฯลฯ">${escapeHtml(noteVal)}</textarea>
+      </label>
     `;
     modalBody.querySelectorAll('[data-crit]').forEach((btn) => {
       btn.addEventListener('click', async () => {
@@ -810,6 +864,9 @@
         await backend.setScore(studentId, currentOccasion, critId, current === value ? null : value);
         if (modal.open) renderStudentModalBody(studentId);
       });
+    });
+    modalBody.querySelector('#f-student-note').addEventListener('change', async (e) => {
+      await backend.setStudentNote(studentId, currentOccasion, e.target.value);
     });
   }
 
@@ -896,7 +953,8 @@
   async function exportBackup() {
     const data = {
       className: state.className, teacher: state.teacher, students: state.students,
-      criteria: state.criteria, occasionDates: state.occasionDates, scores: state.scores,
+      criteria: state.criteria, occasionDates: state.occasionDates, occasionNotes: state.occasionNotes,
+      scores: state.scores,
     };
     await saveFile(`วิจัยจิตพิสัย-ป1-3-backup-${todayStr()}.json`, JSON.stringify(data, null, 2), 'application/json');
   }
@@ -920,12 +978,14 @@
     OCCASIONS.forEach((occ) => {
       state.criteria.forEach((c) => header.push(`ครั้งที่${occ}_${c.label}`));
       header.push(`ครั้งที่${occ}_รวม`);
+      header.push(`ครั้งที่${occ}_บันทึกพฤติกรรม`);
     });
     const rows = [header];
     sortStudents(state.students).forEach((s) => {
       const row = [s.number, s.name];
       OCCASIONS.forEach((occ) => {
-        const rec = state.scores[s.id]?.occasions?.[occ]?.scores || {};
+        const occasionRec = state.scores[s.id]?.occasions?.[occ] || {};
+        const rec = occasionRec.scores || {};
         let total = 0;
         state.criteria.forEach((c) => {
           const v = rec[c.id];
@@ -933,6 +993,7 @@
           if (typeof v === 'number') total += v;
         });
         row.push(String(total));
+        row.push(occasionRec.note || '');
       });
       rows.push(row);
     });
@@ -952,6 +1013,9 @@
   searchInput.addEventListener('input', (e) => { searchQuery = e.target.value; renderMainView(); });
   occasionDateInput.addEventListener('change', async (e) => {
     await backend.setOccasionDate(currentOccasion, e.target.value);
+  });
+  occasionNoteInput.addEventListener('change', async (e) => {
+    await backend.setOccasionNote(currentOccasion, e.target.value);
   });
 
   // ---------- Boot ----------
