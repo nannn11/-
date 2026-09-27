@@ -599,8 +599,11 @@
     const max = maxTotal();
     const average = totals.reduce((a, b) => a + b, 0) / OCCASIONS.length;
     const finalScore = max > 0 ? (average / max) * 10 : 0;
-    const trend = totals[totals.length - 1] > totals[0] ? 'ดีขึ้น' : totals[totals.length - 1] < totals[0] ? 'แย่ลง' : 'คงที่';
-    return { totals, finalScore, verdict: verdictFor(finalScore, 10), passing: isPassingFinal(finalScore), trend };
+    const passing = isPassingFinal(finalScore);
+    const trend = !passing
+      ? 'ลบคงที่'
+      : totals[totals.length - 1] > totals[0] ? 'ดีขึ้น' : totals[totals.length - 1] < totals[0] ? 'แย่ลง' : 'คงที่';
+    return { totals, finalScore, verdict: verdictFor(finalScore, 10), passing, trend };
   }
 
   function showToast(message) {
