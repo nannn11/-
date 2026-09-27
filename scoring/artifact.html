@@ -513,6 +513,8 @@
     return 'ควรปรับปรุง';
   }
   function isPassing(score, max) { return max > 0 && score / max >= 0.5; }
+  const FINAL_PASS_SCORE = 7;
+  function isPassingFinal(finalScore) { return finalScore >= FINAL_PASS_SCORE; }
   function verdictTone(tier) {
     if (tier === 'ดีเยี่ยม' || tier === 'ดีมาก') return '';
     if (tier === 'ดี' || tier === 'พอใช้') return 'mid';
@@ -598,7 +600,7 @@
     const average = totals.reduce((a, b) => a + b, 0) / OCCASIONS.length;
     const finalScore = max > 0 ? (average / max) * 10 : 0;
     const trend = totals[totals.length - 1] > totals[0] ? 'ดีขึ้น' : totals[totals.length - 1] < totals[0] ? 'แย่ลง' : 'คงที่';
-    return { totals, finalScore, verdict: verdictFor(finalScore, 10), passing: isPassing(finalScore, 10), trend };
+    return { totals, finalScore, verdict: verdictFor(finalScore, 10), passing: isPassingFinal(finalScore), trend };
   }
 
   function showToast(message) {
@@ -1042,6 +1044,7 @@
     modalBody.innerHTML = `
       <p class="hint">
         คะแนนจิตพิสัยสุทธิคำนวณจากค่าเฉลี่ยของทั้ง 4 ครั้ง (แต่ละครั้งเต็ม ${maxTotal()}) แล้วปรับสัดส่วนให้เต็ม 10 คะแนนตามหลักสูตร ·
+        ต้องได้ไม่ต่ำกว่า ${FINAL_PASS_SCORE} คะแนนจึงจะถือว่าผ่านเกณฑ์ (ต่ำกว่า ${FINAL_PASS_SCORE} = ไม่ผ่าน) ·
         ผ่านเกณฑ์ ${passCount}/${state.students.length} คน · แนวโน้มเทียบครั้งที่ 4 กับครั้งที่ 1
       </p>
       <div class="table-scroll">
