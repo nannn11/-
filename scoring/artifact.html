@@ -303,11 +303,11 @@
   }
   .card-score-value.mid { color: var(--gold); }
   .card-score-value.low { color: var(--negative); }
-  .card-score-value.unset { color: var(--muted); font-size: 1rem; }
   .card-bar { width: 100%; height: 5px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
   .card-bar-fill { height: 100%; border-radius: 999px; background: var(--gold); }
   .card-of { text-align: center; color: var(--muted); font-size: 0.72rem; }
-  .card-partial { text-align: center; color: var(--gold); font-size: 0.7rem; }
+  .card-verdict { text-align: center; color: var(--positive); font-size: 0.72rem; font-weight: 600; }
+  .card-verdict.fail { color: var(--negative); }
 
   .empty-hint { text-align: center; color: var(--muted); padding: 26px; }
 
@@ -323,6 +323,7 @@
     width: min(560px, 92vw); max-height: 88vh;
     color: var(--ink); background: var(--surface);
   }
+  dialog#modal.wide { width: min(920px, 96vw); }
   dialog#modal::backdrop { background: rgba(20, 18, 10, 0.55); }
   #modalForm { display: flex; flex-direction: column; max-height: 88vh; }
   .modal-header {
@@ -344,28 +345,52 @@
 
   .score-total-banner { background: var(--surface-2); padding: 10px 14px; border-radius: 8px; margin-bottom: 14px; font-size: 0.94rem; }
 
+  .criterion-row-wrap { margin-bottom: 10px; }
   .criterion-row {
-    display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    padding: 10px; background: var(--surface-2); border-radius: 8px; margin-bottom: 8px;
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 10px; background: var(--surface-2); border-radius: 8px 8px 0 0;
   }
-  .criterion-label { font-size: 0.88rem; }
-  .level-buttons { display: flex; gap: 6px; flex-shrink: 0; }
+  .criterion-label { font-size: 0.86rem; font-weight: 600; }
+  .level-buttons { display: flex; gap: 5px; flex-shrink: 0; }
   .level-btn {
-    width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--line);
-    background: var(--surface); color: var(--ink); font-weight: 700; cursor: pointer;
+    width: 30px; height: 30px; border-radius: 7px; border: 1px solid var(--line);
+    background: var(--surface); color: var(--ink); font-weight: 700; font-size: 0.85rem; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
   }
   .level-btn:hover { background: var(--accent-soft); }
   .level-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .criterion-desc {
+    margin: 0; padding: 8px 10px; background: var(--surface-2); border-radius: 0 0 8px 8px;
+    border-top: 1px dashed var(--line); font-size: 0.8rem; color: var(--muted);
+  }
 
+  .criteria-card {
+    border: 1px solid var(--line); border-radius: 10px; padding: 10px; margin-bottom: 14px;
+  }
   .criteria-list-row {
     display: flex; align-items: center; gap: 8px;
-    padding: 8px 10px; background: var(--surface-2); border-radius: 8px; margin-bottom: 6px;
+    padding: 8px 10px; background: var(--surface-2); border-radius: 8px; margin-bottom: 8px;
   }
+  .criteria-title-input { font-weight: 600; }
   .criteria-input {
     flex: 1; font-family: inherit; font-size: 0.9rem; padding: 6px 8px; border-radius: 6px;
     border: 1px solid var(--line); background: var(--surface); color: var(--ink);
   }
+  .criteria-level-row {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 0.82rem; color: var(--muted);
+  }
+  .criteria-level-row span { flex-shrink: 0; width: 78px; }
+
+  .table-scroll { overflow-x: auto; }
+  .summary-table { width: 100%; border-collapse: collapse; min-width: 640px; }
+  .summary-table th, .summary-table td {
+    padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left;
+    font-size: 0.84rem; white-space: nowrap;
+  }
+  .summary-table th { color: var(--muted); font-weight: 600; }
+  .summary-table td.num { font-variant-numeric: tabular-nums; text-align: center; }
+  .summary-table td.pass { color: var(--positive); font-weight: 600; }
+  .summary-table td.fail { color: var(--negative); font-weight: 600; }
 
   @media (max-width: 640px) {
     .view-toolbar { flex-direction: column; align-items: stretch; }
@@ -386,6 +411,7 @@
     <div class="topbar-actions">
       <span id="syncBadge" class="sync-badge">กำลังเชื่อมต่อ…</span>
       <button id="btnCriteria" class="btn btn-secondary" title="ตั้งค่าหัวข้อประเมิน">⚙️ หัวข้อประเมิน</button>
+      <button id="btnSummary" class="btn btn-secondary" title="สรุปผลรวม 4 ครั้ง และคะแนนจิตพิสัยสุทธิ (เต็ม 10)">📊 สรุปผลรวม</button>
       <button id="btnExportCsv" class="btn btn-ghost" title="ส่งออกข้อมูลทั้ง 4 ครั้งเป็น CSV สำหรับวิเคราะห์">⬇️ CSV</button>
       <button id="btnExport" class="btn btn-ghost" title="สำรองข้อมูลทั้งหมดเป็นไฟล์ JSON">💾 สำรองข้อมูล</button>
       <label class="btn btn-ghost" title="กู้คืนข้อมูลจากไฟล์ JSON">
@@ -421,7 +447,7 @@
         <span id="occasionNoteLabel">รายละเอียดการเรียนการสอน/กิจกรรมในคาบนี้</span>
         <textarea id="occasionNoteInput" rows="3" placeholder="เช่น เนื้อหาที่สอน กิจกรรมที่ทำ บริบทของคาบเก็บข้อมูลครั้งนี้..."></textarea>
       </label>
-      <p class="hint">แตะที่กล่องนักเรียนเพื่อกรอกคะแนนแต่ละหัวข้อและบันทึกพฤติกรรมของครั้งนี้ (0-2 คะแนนต่อข้อ)</p>
+      <p class="hint">แตะที่กล่องนักเรียนเพื่อปรับคะแนนแต่ละหัวข้อและบันทึกพฤติกรรมของครั้งนี้ (เริ่มต้นเต็ม 5 คะแนนต่อข้อ)</p>
       <div id="studentRows" class="roster-grid"></div>
       <p id="noResults" class="empty-hint hidden">ไม่พบนักเรียนที่ค้นหา</p>
     </section>
@@ -448,14 +474,50 @@
   const CLASS_ID = 'p1-3';
   const LOCAL_KEY = 'psychomotorResearch.v1';
   const OCCASIONS = [1, 2, 3, 4];
-  const MAX_PER_ITEM = 2;
+  const LEVELS = [5, 4, 3, 2, 1];
+  const LEVEL_TIERS = { 5: 'ดีเยี่ยม', 4: 'ดีมาก', 3: 'ดี', 2: 'พอใช้', 1: 'ควรปรับปรุง' };
+  const MAX_PER_ITEM = 5;
+  const DEFAULT_LEVEL = 5;
   const DEFAULT_CRITERIA = [
-    { id: 'c1', label: 'ความรับผิดชอบ' },
-    { id: 'c2', label: 'ความมีระเบียบวินัย' },
-    { id: 'c3', label: 'ความตั้งใจเรียน' },
-    { id: 'c4', label: 'ความร่วมมือ' },
-    { id: 'c5', label: 'มารยาทและความสุภาพ' },
+    {
+      id: 'participation',
+      label: 'ความตั้งใจและการมีส่วนร่วมในกิจกรรม',
+      descriptions: {
+        5: 'มีความตั้งใจและมีส่วนร่วมในกิจกรรมอย่างเต็มที่ตลอดเวลา',
+        4: 'มีส่วนร่วมในกิจกรรมเกือบทุกครั้ง มีความตั้งใจสม่ำเสมอ',
+        3: 'มีส่วนร่วมในกิจกรรมเป็นบางครั้ง และยังมีสมาธิไม่ต่อเนื่อง',
+        2: 'มีส่วนร่วมน้อย ไม่ค่อยตั้งใจและมักจะสนใจสิ่งอื่นแทน',
+        1: 'ไม่แสดงพฤติกรรมการมีส่วนร่วม หรือขัดขวางกิจกรรม',
+      },
+    },
+    {
+      id: 'discipline',
+      label: 'ความมีระเบียบวินัยและความรับผิดชอบ',
+      descriptions: {
+        5: 'มีระเบียบวินัยและความรับผิดชอบอย่างเต็มที่ตลอดเวลา ปฏิบัติตามกฎระเบียบและทำหน้าที่ที่ได้รับมอบหมายครบถ้วนสม่ำเสมอ',
+        4: 'มีระเบียบวินัยและความรับผิดชอบเกือบทุกครั้ง ปฏิบัติตามกฎระเบียบและทำหน้าที่ที่ได้รับมอบหมายเป็นประจำ',
+        3: 'มีระเบียบวินัยและความรับผิดชอบเป็นบางครั้ง ปฏิบัติตามกฎระเบียบและทำหน้าที่ที่ได้รับมอบหมายแต่ยังไม่สม่ำเสมอ',
+        2: 'มีระเบียบวินัยและความรับผิดชอบน้อย ไม่ค่อยปฏิบัติตามกฎระเบียบหรือทำหน้าที่ที่ได้รับมอบหมายไม่ครบถ้วน',
+        1: 'ไม่แสดงความมีระเบียบวินัยหรือความรับผิดชอบ ไม่ปฏิบัติตามกฎระเบียบหรือขาดความรับผิดชอบต่อหน้าที่ที่ได้รับมอบหมาย',
+      },
+    },
   ];
+
+  function verdictFor(score, max) {
+    if (max <= 0) return null;
+    const pct = score / max;
+    if (pct >= 0.9) return 'ดีเยี่ยม';
+    if (pct >= 0.8) return 'ดีมาก';
+    if (pct >= 0.6) return 'ดี';
+    if (pct >= 0.5) return 'พอใช้';
+    return 'ควรปรับปรุง';
+  }
+  function isPassing(score, max) { return max > 0 && score / max >= 0.5; }
+  function verdictTone(tier) {
+    if (tier === 'ดีเยี่ยม' || tier === 'ดีมาก') return '';
+    if (tier === 'ดี' || tier === 'พอใช้') return 'mid';
+    return 'low';
+  }
 
   const state = {
     className: 'ป.1/3',
@@ -516,25 +578,27 @@
     });
   }
 
+  function getCriterionScore(rec, critId) {
+    const v = rec[critId];
+    return typeof v === 'number' ? v : DEFAULT_LEVEL;
+  }
+
   function occasionSummary(studentId, occasionNum) {
     const rec = state.scores[studentId]?.occasions?.[occasionNum]?.scores || {};
     let total = 0;
-    let answered = 0;
-    state.criteria.forEach((c) => {
-      const v = rec[c.id];
-      if (typeof v === 'number') { total += v; answered++; }
-    });
-    return { total, answered, totalCriteria: state.criteria.length };
+    state.criteria.forEach((c) => { total += getCriterionScore(rec, c.id); });
+    return { total };
   }
 
   function maxTotal() { return state.criteria.length * MAX_PER_ITEM; }
 
-  function scorePillClass(total, max) {
-    if (max <= 0) return '';
-    const ratio = total / max;
-    if (ratio < 0.4) return 'low';
-    if (ratio < 0.8) return 'mid';
-    return '';
+  function finalSummary(studentId) {
+    const totals = OCCASIONS.map((occ) => occasionSummary(studentId, occ).total);
+    const max = maxTotal();
+    const average = totals.reduce((a, b) => a + b, 0) / OCCASIONS.length;
+    const finalScore = max > 0 ? (average / max) * 10 : 0;
+    const trend = totals[totals.length - 1] > totals[0] ? 'ดีขึ้น' : totals[totals.length - 1] < totals[0] ? 'แย่ลง' : 'คงที่';
+    return { totals, finalScore, verdict: verdictFor(finalScore, 10), passing: isPassing(finalScore, 10), trend };
   }
 
   function showToast(message) {
@@ -748,20 +812,22 @@
         return btn;
       });
     }
+    const max = maxTotal();
     OCCASIONS.forEach((occ, i) => {
       const btn = occasionTabButtons[i];
       btn.className = 'occasion-tab' + (occ === currentOccasion ? ' active' : '');
-      const completeCount = state.students.filter((s) => occasionSummary(s.id, occ).answered === state.criteria.length && state.criteria.length > 0).length;
-      const check = state.students.length > 0 && completeCount === state.students.length ? '<span class="tab-check">✓</span>' : '';
+      const passCount = state.students.filter((s) => isPassing(occasionSummary(s.id, occ).total, max)).length;
+      const check = state.students.length > 0 && passCount === state.students.length ? '<span class="tab-check">✓</span>' : '';
       btn.innerHTML = `${check}ครั้งที่ ${occ}`;
     });
   }
 
   function renderMainView() {
     occasionTitleEl.textContent = `ครั้งที่ ${currentOccasion}`;
-    const completeCount = state.students.filter((s) => occasionSummary(s.id, currentOccasion).answered === state.criteria.length && state.criteria.length > 0).length;
+    const max = maxTotal();
+    const passCount = state.students.filter((s) => isPassing(occasionSummary(s.id, currentOccasion).total, max)).length;
     const teacherText = state.teacher ? ` · ครูประจำชั้น ${state.teacher}` : '';
-    occasionMetaEl.textContent = `${state.students.length} คน · บันทึกครบแล้ว ${completeCount}/${state.students.length} คน · คะแนนเต็ม ${maxTotal()}${teacherText}`;
+    occasionMetaEl.textContent = `${state.students.length} คน · ผ่านเกณฑ์ ${passCount}/${state.students.length} คน · คะแนนเต็ม ${max} (เริ่มต้นเต็มทุกคน หักเมื่อมีพฤติกรรมไม่พึงประสงค์)${teacherText}`;
     occasionDateInput.value = state.occasionDates[currentOccasion] || '';
     occasionNoteLabel.textContent = `รายละเอียดการเรียนการสอน/กิจกรรมในคาบนี้ (ครั้งที่ ${currentOccasion})`;
     occasionNoteInput.value = state.occasionNotes[currentOccasion] || '';
@@ -774,12 +840,11 @@
     noResultsEl.classList.toggle('hidden', sorted.length !== 0);
 
     sorted.forEach((student) => {
-      const { total, answered, totalCriteria } = occasionSummary(student.id, currentOccasion);
-      const max = maxTotal();
+      const { total } = occasionSummary(student.id, currentOccasion);
       const pct = max > 0 ? Math.max(0, Math.min(100, (total / max) * 100)) : 0;
-      const pillClass = answered === 0 ? 'unset' : scorePillClass(total, max);
-      const valueText = answered === 0 ? '—' : String(total);
-      const partialText = answered > 0 && answered < totalCriteria ? `<div class="card-partial">บันทึก ${answered}/${totalCriteria} ข้อ</div>` : '';
+      const tier = verdictFor(total, max);
+      const pillClass = verdictTone(tier);
+      const passing = isPassing(total, max);
       const hasNote = !!(state.scores[student.id]?.occasions?.[currentOccasion]?.note);
       const card = document.createElement('div');
       card.className = 'student-card';
@@ -790,11 +855,11 @@
         </div>
         <div class="card-name">${escapeHtml(student.name)}</div>
         <div class="card-score-row">
-          <span class="card-score-value ${pillClass}">${valueText}</span>
+          <span class="card-score-value ${pillClass}">${total}</span>
           <span class="card-of">/ ${max}</span>
         </div>
         <div class="card-bar"><div class="card-bar-fill" style="width:${pct}%"></div></div>
-        ${partialText}
+        <div class="card-verdict ${passing ? '' : 'fail'}">${tier} · ${passing ? 'ผ่าน' : 'ไม่ผ่าน'}</div>
       `;
       card.addEventListener('click', () => openStudentModal(student.id));
       studentRowsEl.appendChild(card);
@@ -804,6 +869,7 @@
   // ---------- Modal ----------
   function openModal(title) {
     modalTitle.textContent = title;
+    modal.classList.remove('wide');
     if (!modal.open) modal.showModal();
   }
   function closeModal() {
@@ -835,19 +901,30 @@
     const rec = occasionRec.scores || {};
     const noteVal = occasionRec.note || '';
     const { total } = occasionSummary(studentId, currentOccasion);
+    const max = maxTotal();
+    const tier = verdictFor(total, max);
+    const passing = isPassing(total, max);
     const rows = state.criteria.map((c) => {
-      const val = rec[c.id];
+      const val = getCriterionScore(rec, c.id);
+      const desc = (c.descriptions && c.descriptions[val]) || '';
       return `
-        <div class="criterion-row">
-          <span class="criterion-label">${escapeHtml(c.label)}</span>
-          <div class="level-buttons">
-            ${[0, 1, 2].map((lv) => `<button type="button" class="level-btn ${val === lv ? 'active' : ''}" data-crit="${c.id}" data-value="${lv}">${lv}</button>`).join('')}
+        <div class="criterion-row-wrap">
+          <div class="criterion-row">
+            <span class="criterion-label">${escapeHtml(c.label)}</span>
+            <div class="level-buttons">
+              ${LEVELS.map((lv) => `<button type="button" class="level-btn ${val === lv ? 'active' : ''}" data-crit="${c.id}" data-value="${lv}">${lv}</button>`).join('')}
+            </div>
           </div>
+          ${desc ? `<p class="criterion-desc">${escapeHtml(String(val))} = ${escapeHtml(desc)}</p>` : ''}
         </div>
       `;
     }).join('');
     modalBody.innerHTML = `
-      <div class="score-total-banner">คะแนนรวมครั้งที่ ${currentOccasion}: <strong>${total}</strong> / ${maxTotal()}</div>
+      <div class="score-total-banner">
+        คะแนนรวมครั้งที่ ${currentOccasion}: <strong>${total}</strong> / ${max}
+        · <strong class="${passing ? '' : 'negative'}">${tier}</strong> (${passing ? 'ผ่าน' : 'ไม่ผ่าน'})
+      </div>
+      <p class="hint">เริ่มต้นทุกหัวข้อเต็มคะแนน (5) แตะระดับที่ตรงกับพฤติกรรมเพื่อปรับ/หักคะแนน</p>
       ${state.criteria.length === 0
         ? '<p class="empty-hint">ยังไม่มีหัวข้อประเมิน กดปุ่ม "⚙️ หัวข้อประเมิน" ที่ด้านบนเพื่อเพิ่ม</p>'
         : rows}
@@ -860,8 +937,7 @@
       btn.addEventListener('click', async () => {
         const critId = btn.dataset.crit;
         const value = parseInt(btn.dataset.value, 10);
-        const current = rec[critId];
-        await backend.setScore(studentId, currentOccasion, critId, current === value ? null : value);
+        await backend.setScore(studentId, currentOccasion, critId, value);
         if (modal.open) renderStudentModalBody(studentId);
       });
     });
@@ -892,7 +968,7 @@
 
   // ---------- Criteria settings ----------
   function openCriteriaModal() {
-    openModal('ตั้งค่าหัวข้อประเมิน (0-2 คะแนนต่อข้อ)');
+    openModal(`ตั้งค่าหัวข้อประเมิน (${MAX_PER_ITEM} คะแนนต่อข้อ)`);
     renderCriteriaBody();
     modalFooter.innerHTML = `<button type="button" class="btn btn-ghost" data-close>ปิด</button>`;
     modalFooter.querySelector('[data-close]').addEventListener('click', closeModal);
@@ -901,34 +977,89 @@
 
   function renderCriteriaBody() {
     modalBody.innerHTML = `
-      <p class="hint">5 หัวข้อด้านล่างเป็นตัวอย่างเริ่มต้น แก้ไขชื่อ เพิ่ม หรือลบให้ตรงกับเครื่องมือวิจัยของคุณได้ทุกเมื่อ แนะนำให้ตั้งค่าให้ครบก่อนเริ่มบันทึกครั้งที่ 1 เพื่อให้ใช้เกณฑ์เดียวกันทั้ง 4 ครั้ง</p>
+      <p class="hint">แก้ไขชื่อหัวข้อและคำอธิบายเกณฑ์แต่ละระดับ (${LEVELS[0]}=${LEVEL_TIERS[LEVELS[0]]} ... ${LEVELS[LEVELS.length - 1]}=${LEVEL_TIERS[LEVELS[LEVELS.length - 1]]}) ให้ตรงกับเครื่องมือวิจัยของคุณ ทุกหัวข้อเริ่มต้นที่คะแนนเต็ม (${DEFAULT_LEVEL}) เสมอ แนะนำให้ตั้งค่าให้ครบก่อนเริ่มบันทึกครั้งที่ 1 เพื่อให้ใช้เกณฑ์เดียวกันทั้ง 4 ครั้ง</p>
       <div id="criteriaList"></div>
       <button type="button" id="btnAddCriterion" class="btn btn-secondary">+ เพิ่มหัวข้อ</button>
     `;
     const listEl = modalBody.querySelector('#criteriaList');
     state.criteria.forEach((c) => {
-      const row = document.createElement('div');
-      row.className = 'criteria-list-row';
-      row.innerHTML = `
-        <input type="text" class="criteria-input" value="${escapeHtml(c.label)}">
-        <button type="button" class="btn-icon" title="ลบหัวข้อนี้">🗑️</button>
+      const card = document.createElement('div');
+      card.className = 'criteria-card';
+      card.innerHTML = `
+        <div class="criteria-list-row">
+          <input type="text" class="criteria-input criteria-title-input" value="${escapeHtml(c.label)}">
+          <button type="button" class="btn-icon" title="ลบหัวข้อนี้">🗑️</button>
+        </div>
+        ${LEVELS.map((lv) => `
+          <label class="criteria-level-row">
+            <span>${lv} (${LEVEL_TIERS[lv]})</span>
+            <input type="text" class="criteria-input" data-level="${lv}" value="${escapeHtml((c.descriptions && c.descriptions[lv]) || '')}" placeholder="คำอธิบายเกณฑ์ระดับ ${lv}">
+          </label>
+        `).join('')}
       `;
-      const input = row.querySelector('input');
-      input.addEventListener('change', async () => {
-        const newLabel = input.value.trim() || c.label;
+      card.querySelector('.criteria-title-input').addEventListener('change', async (e) => {
+        const newLabel = e.target.value.trim() || c.label;
         await backend.setCriteria(state.criteria.map((x) => (x.id === c.id ? { ...x, label: newLabel } : x)));
       });
-      row.querySelector('button').addEventListener('click', async () => {
+      card.querySelector('[title="ลบหัวข้อนี้"]').addEventListener('click', async () => {
         if (!confirm(`ยืนยันลบหัวข้อ "${c.label}"? คะแนนที่เคยบันทึกในหัวข้อนี้จะไม่แสดงอีกต่อไป`)) return;
         await backend.setCriteria(state.criteria.filter((x) => x.id !== c.id));
         renderCriteriaBody();
       });
-      listEl.appendChild(row);
+      card.querySelectorAll('[data-level]').forEach((input) => {
+        input.addEventListener('change', async (e) => {
+          const lv = parseInt(e.target.dataset.level, 10);
+          const newDescriptions = { ...(c.descriptions || {}), [lv]: e.target.value.trim() };
+          await backend.setCriteria(state.criteria.map((x) => (x.id === c.id ? { ...x, descriptions: newDescriptions } : x)));
+        });
+      });
+      listEl.appendChild(card);
     });
     modalBody.querySelector('#btnAddCriterion').addEventListener('click', async () => {
-      await backend.setCriteria([...state.criteria, { id: uid(), label: 'หัวข้อใหม่' }]);
+      await backend.setCriteria([...state.criteria, { id: uid(), label: 'หัวข้อใหม่', descriptions: {} }]);
       renderCriteriaBody();
     });
+  }
+
+  function openSummaryModal() {
+    openModal(`สรุปผลรวม 4 ครั้ง · คะแนนจิตพิสัยสุทธิ (เต็ม 10)`);
+    modal.classList.add('wide');
+    const passCount = sortStudents(state.students).filter((s) => finalSummary(s.id).passing).length;
+    const rows = sortStudents(state.students).map((s) => {
+      const { totals, finalScore, verdict, passing, trend } = finalSummary(s.id);
+      return `
+        <tr>
+          <td>${escapeHtml(s.number)}</td>
+          <td>${escapeHtml(s.name)}</td>
+          ${totals.map((t) => `<td class="num">${t}</td>`).join('')}
+          <td class="num"><strong>${finalScore.toFixed(1)}</strong></td>
+          <td>${verdict}</td>
+          <td class="${passing ? 'pass' : 'fail'}">${passing ? 'ผ่าน' : 'ไม่ผ่าน'}</td>
+          <td>${trend}</td>
+        </tr>
+      `;
+    }).join('');
+    modalBody.innerHTML = `
+      <p class="hint">
+        คะแนนจิตพิสัยสุทธิคำนวณจากค่าเฉลี่ยของทั้ง 4 ครั้ง (แต่ละครั้งเต็ม ${maxTotal()}) แล้วปรับสัดส่วนให้เต็ม 10 คะแนนตามหลักสูตร ·
+        ผ่านเกณฑ์ ${passCount}/${state.students.length} คน · แนวโน้มเทียบครั้งที่ 4 กับครั้งที่ 1
+      </p>
+      <div class="table-scroll">
+        <table class="summary-table">
+          <thead>
+            <tr>
+              <th>เลขที่</th><th>ชื่อ-สกุล</th>
+              ${OCCASIONS.map((occ) => `<th>ครั้งที่ ${occ}</th>`).join('')}
+              <th>คะแนนสุทธิ /10</th><th>ระดับ</th><th>ผล</th><th>แนวโน้ม</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `;
+    modalFooter.innerHTML = `<button type="button" class="btn btn-ghost" data-close>ปิด</button>`;
+    modalFooter.querySelector('[data-close]').addEventListener('click', closeModal);
+    modalForm.onsubmit = null;
   }
 
   // ---------- File save (downloads capability, fallback to blob link) ----------
@@ -980,6 +1111,7 @@
       header.push(`ครั้งที่${occ}_รวม`);
       header.push(`ครั้งที่${occ}_บันทึกพฤติกรรม`);
     });
+    header.push('คะแนนสุทธิ_เต็ม10', 'ระดับสุทธิ', 'ผลสุทธิ', 'แนวโน้ม');
     const rows = [header];
     sortStudents(state.students).forEach((s) => {
       const row = [s.number, s.name];
@@ -988,13 +1120,15 @@
         const rec = occasionRec.scores || {};
         let total = 0;
         state.criteria.forEach((c) => {
-          const v = rec[c.id];
-          row.push(typeof v === 'number' ? String(v) : '');
-          if (typeof v === 'number') total += v;
+          const v = getCriterionScore(rec, c.id);
+          row.push(String(v));
+          total += v;
         });
         row.push(String(total));
         row.push(occasionRec.note || '');
       });
+      const { finalScore, verdict, passing, trend } = finalSummary(s.id);
+      row.push(finalScore.toFixed(1), verdict, passing ? 'ผ่าน' : 'ไม่ผ่าน', trend);
       rows.push(row);
     });
     const csv = rows.map((r) => r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\r\n');
@@ -1003,6 +1137,7 @@
 
   // ---------- Wire up global buttons ----------
   document.getElementById('btnCriteria').addEventListener('click', openCriteriaModal);
+  document.getElementById('btnSummary').addEventListener('click', openSummaryModal);
   document.getElementById('btnExportCsv').addEventListener('click', exportCsv);
   document.getElementById('btnExport').addEventListener('click', exportBackup);
   document.getElementById('importFile').addEventListener('change', (e) => {
