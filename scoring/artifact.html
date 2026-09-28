@@ -343,6 +343,10 @@
   }
   .hint { font-size: 0.84rem; color: var(--muted); margin: 0 0 12px; }
 
+  .field-with-save { margin-bottom: 14px; }
+  .field-with-save .field { margin-bottom: 6px; }
+  .btn-save-note { display: block; margin-left: auto; }
+
   .score-total-banner { background: var(--surface-2); padding: 10px 14px; border-radius: 8px; margin-bottom: 14px; font-size: 0.94rem; }
 
   .criterion-row-wrap { margin-bottom: 10px; }
@@ -462,10 +466,20 @@
           <input type="search" id="searchInput" placeholder="ค้นหาเลขที่หรือรหัสประจำตัว...">
         </div>
       </div>
-      <label class="field">
-        <span id="occasionNoteLabel">รายละเอียดการเรียนการสอน/กิจกรรมในคาบนี้</span>
-        <textarea id="occasionNoteInput" rows="3" placeholder="เช่น เนื้อหาที่สอน กิจกรรมที่ทำ บริบทของคาบเก็บข้อมูลครั้งนี้..."></textarea>
-      </label>
+      <div class="field-with-save">
+        <label class="field">
+          <span id="occasionNoteLabel">รายละเอียดการเรียนการสอน/กิจกรรมในคาบนี้</span>
+          <textarea id="occasionNoteInput" rows="3" placeholder="เช่น เนื้อหาที่สอน กิจกรรมที่ทำ บริบทของคาบเก็บข้อมูลครั้งนี้..."></textarea>
+        </label>
+        <button type="button" id="btnSaveOccasionNote" class="btn btn-secondary btn-save-note">💾 บันทึก</button>
+      </div>
+      <div class="field-with-save">
+        <label class="field">
+          <span id="postTeachingNoteLabel">บันทึกหลังการสอน</span>
+          <textarea id="postTeachingNoteInput" rows="3" placeholder="เช่น ข้อสังเกตหลังสอน ปัญหาที่พบ สิ่งที่ควรปรับปรุงครั้งถัดไป..."></textarea>
+        </label>
+        <button type="button" id="btnSavePostTeachingNote" class="btn btn-secondary btn-save-note">💾 บันทึก</button>
+      </div>
       <p class="hint">แตะที่กล่องนักเรียนเพื่อปรับคะแนนแต่ละหัวข้อและบันทึกพฤติกรรมของครั้งนี้ (เริ่มต้นเต็ม 5 คะแนนต่อข้อ)</p>
       <div id="studentRows" class="roster-grid"></div>
       <p id="noResults" class="empty-hint hidden">ไม่พบนักเรียนที่ค้นหา</p>
@@ -541,6 +555,7 @@
   }
 
   const SONGS = [
+    { id: 'nationalAnthem', label: 'เพลงชาติ' },
     { id: 'anthem', label: 'เพลงสรรเสริญพระบารมี' },
     { id: 'schoolSong', label: 'เพลงสดุดีอัสสัมชัญ' },
   ];
@@ -570,6 +585,7 @@
     criteria: [],
     occasionDates: { 1: '', 2: '', 3: '', 4: '' },
     occasionNotes: { 1: '', 2: '', 3: '', 4: '' },
+    postTeachingNotes: { 1: '', 2: '', 3: '', 4: '' },
     scores: {},
   };
   let currentOccasion = 1;
@@ -590,6 +606,8 @@
   const occasionDateInput = document.getElementById('occasionDateInput');
   const occasionNoteInput = document.getElementById('occasionNoteInput');
   const occasionNoteLabel = document.getElementById('occasionNoteLabel');
+  const postTeachingNoteInput = document.getElementById('postTeachingNoteInput');
+  const postTeachingNoteLabel = document.getElementById('postTeachingNoteLabel');
   const studentRowsEl = document.getElementById('studentRows');
   const noResultsEl = document.getElementById('noResults');
   const searchInput = document.getElementById('searchInput');
@@ -672,7 +690,7 @@
       localStorage.setItem(LOCAL_KEY, JSON.stringify({
         className: state.className, teacher: state.teacher, students: state.students,
         criteria: state.criteria, occasionDates: state.occasionDates, occasionNotes: state.occasionNotes,
-        scores: state.scores,
+        postTeachingNotes: state.postTeachingNotes, scores: state.scores,
       }));
     }
     return {
@@ -686,6 +704,7 @@
           state.criteria = Array.isArray(loaded.criteria) ? loaded.criteria : DEFAULT_CRITERIA;
           state.occasionDates = loaded.occasionDates || { 1: '', 2: '', 3: '', 4: '' };
           state.occasionNotes = loaded.occasionNotes || { 1: '', 2: '', 3: '', 4: '' };
+          state.postTeachingNotes = loaded.postTeachingNotes || { 1: '', 2: '', 3: '', 4: '' };
           state.scores = loaded.scores || {};
         } else {
           state.criteria = DEFAULT_CRITERIA;
@@ -722,6 +741,10 @@
         state.occasionNotes = { ...state.occasionNotes, [occasionNum]: text };
         persist();
       },
+      async setPostTeachingNote(occasionNum, text) {
+        state.postTeachingNotes = { ...state.postTeachingNotes, [occasionNum]: text };
+        persist();
+      },
       async updateStudentInfo(studentId, patch) {
         state.students = state.students.map((s) => (s.id === studentId ? { ...s, ...patch } : s));
         persist(); render();
@@ -733,6 +756,7 @@
         state.criteria = Array.isArray(data.criteria) ? data.criteria : DEFAULT_CRITERIA;
         state.occasionDates = data.occasionDates || { 1: '', 2: '', 3: '', 4: '' };
         state.occasionNotes = data.occasionNotes || { 1: '', 2: '', 3: '', 4: '' };
+        state.postTeachingNotes = data.postTeachingNotes || { 1: '', 2: '', 3: '', 4: '' };
         state.scores = data.scores || {};
         persist(); render();
       },
@@ -763,6 +787,7 @@
             criteria: DEFAULT_CRITERIA,
             occasionDates: { 1: '', 2: '', 3: '', 4: '' },
             occasionNotes: { 1: '', 2: '', 3: '', 4: '' },
+            postTeachingNotes: { 1: '', 2: '', 3: '', 4: '' },
           });
         }
         return;
@@ -771,6 +796,7 @@
       state.criteria = Array.isArray(d.criteria) ? d.criteria : DEFAULT_CRITERIA;
       state.occasionDates = d.occasionDates || { 1: '', 2: '', 3: '', 4: '' };
       state.occasionNotes = d.occasionNotes || { 1: '', 2: '', 3: '', 4: '' };
+      state.postTeachingNotes = d.postTeachingNotes || { 1: '', 2: '', 3: '', 4: '' };
       render();
     });
 
@@ -785,11 +811,11 @@
       mode: 'db',
       async init() {},
       async setCriteria(newList) {
-        await configDoc.set({ criteria: newList, occasionDates: state.occasionDates, occasionNotes: state.occasionNotes });
+        await configDoc.set({ criteria: newList, occasionDates: state.occasionDates, occasionNotes: state.occasionNotes, postTeachingNotes: state.postTeachingNotes });
       },
       async setOccasionDate(occasionNum, dateStr) {
         const newDates = { ...state.occasionDates, [occasionNum]: dateStr };
-        await configDoc.set({ criteria: state.criteria, occasionDates: newDates, occasionNotes: state.occasionNotes });
+        await configDoc.set({ criteria: state.criteria, occasionDates: newDates, occasionNotes: state.occasionNotes, postTeachingNotes: state.postTeachingNotes });
       },
       async setScore(studentId, occasionNum, criterionId, value) {
         const current = state.scores[studentId] || { occasions: {} };
@@ -813,7 +839,11 @@
       },
       async setOccasionNote(occasionNum, text) {
         const newNotes = { ...state.occasionNotes, [occasionNum]: text };
-        await configDoc.set({ criteria: state.criteria, occasionDates: state.occasionDates, occasionNotes: newNotes });
+        await configDoc.set({ criteria: state.criteria, occasionDates: state.occasionDates, occasionNotes: newNotes, postTeachingNotes: state.postTeachingNotes });
+      },
+      async setPostTeachingNote(occasionNum, text) {
+        const newNotes = { ...state.postTeachingNotes, [occasionNum]: text };
+        await configDoc.set({ criteria: state.criteria, occasionDates: state.occasionDates, occasionNotes: state.occasionNotes, postTeachingNotes: newNotes });
       },
       async updateStudentInfo(studentId, patch) {
         const students = state.students.map((s) => (s.id === studentId ? { ...s, ...patch } : s));
@@ -832,6 +862,7 @@
           criteria: Array.isArray(data.criteria) ? data.criteria : DEFAULT_CRITERIA,
           occasionDates: data.occasionDates || { 1: '', 2: '', 3: '', 4: '' },
           occasionNotes: data.occasionNotes || { 1: '', 2: '', 3: '', 4: '' },
+          postTeachingNotes: data.postTeachingNotes || { 1: '', 2: '', 3: '', 4: '' },
         }));
         const byStudent = data.scores || {};
         Object.keys(byStudent).forEach((studentId) => {
@@ -891,6 +922,8 @@
     occasionDateInput.value = state.occasionDates[currentOccasion] || '';
     occasionNoteLabel.textContent = `รายละเอียดการเรียนการสอน/กิจกรรมในคาบนี้ (ครั้งที่ ${currentOccasion})`;
     occasionNoteInput.value = state.occasionNotes[currentOccasion] || '';
+    postTeachingNoteLabel.textContent = `บันทึกหลังการสอน (ครั้งที่ ${currentOccasion})`;
+    postTeachingNoteInput.value = state.postTeachingNotes[currentOccasion] || '';
 
     const q = searchQuery.trim().toLowerCase();
     const filtered = state.students.filter((s) => !q || s.number.toLowerCase().includes(q) || String(s.code || '').toLowerCase().includes(q));
@@ -906,7 +939,7 @@
       const pillClass = verdictTone(tier);
       const passing = isPassing(total, max);
       const hasNote = !!(state.scores[student.id]?.occasions?.[currentOccasion]?.note);
-      const hasSinging = getSingingResult(student.id, SONGS[0].id) !== null || getSingingResult(student.id, SONGS[1].id) !== null;
+      const hasSinging = SONGS.some((s) => getSingingResult(student.id, s.id) !== null);
       const card = document.createElement('div');
       card.className = 'student-card';
       card.innerHTML = `
@@ -1218,7 +1251,7 @@
     const data = {
       className: state.className, teacher: state.teacher, students: state.students,
       criteria: state.criteria, occasionDates: state.occasionDates, occasionNotes: state.occasionNotes,
-      scores: state.scores,
+      postTeachingNotes: state.postTeachingNotes, scores: state.scores,
     };
     await saveFile(`วิจัยจิตพิสัย-ป1-3-backup-${todayStr()}.json`, JSON.stringify(data, null, 2), 'application/json');
   }
@@ -1293,6 +1326,17 @@
   });
   occasionNoteInput.addEventListener('change', async (e) => {
     await backend.setOccasionNote(currentOccasion, e.target.value);
+  });
+  postTeachingNoteInput.addEventListener('change', async (e) => {
+    await backend.setPostTeachingNote(currentOccasion, e.target.value);
+  });
+  document.getElementById('btnSaveOccasionNote').addEventListener('click', async () => {
+    await backend.setOccasionNote(currentOccasion, occasionNoteInput.value);
+    showToast('บันทึกรายละเอียดการสอนแล้ว');
+  });
+  document.getElementById('btnSavePostTeachingNote').addEventListener('click', async () => {
+    await backend.setPostTeachingNote(currentOccasion, postTeachingNoteInput.value);
+    showToast('บันทึกข้อมูลหลังการสอนแล้ว');
   });
 
   // ---------- Boot ----------
