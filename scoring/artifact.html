@@ -383,8 +383,19 @@
 
   .singing-section { margin-top: 18px; padding-top: 14px; border-top: 2px dashed var(--line); }
   .singing-heading { margin: 0 0 4px; font-size: 0.98rem; }
-  .singing-field { margin-bottom: 10px; }
-  .singing-input { max-width: 120px; }
+  .singing-field {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px;
+    margin-bottom: 8px;
+  }
+  .singing-field-label { font-size: 0.86rem; font-weight: 600; }
+  .singing-buttons { display: flex; gap: 6px; flex-shrink: 0; }
+  .singing-btn {
+    padding: 6px 12px; border-radius: 7px; border: 1px solid var(--line);
+    background: var(--surface); color: var(--ink); font-weight: 600; font-size: 0.82rem; cursor: pointer;
+  }
+  .singing-btn:hover { background: var(--accent-soft); }
+  .singing-btn.pass.active { background: var(--positive); color: #fff; border-color: var(--positive); }
+  .singing-btn.fail.active { background: var(--negative); color: #fff; border-color: var(--negative); }
   .singing-total { font-size: 0.88rem; color: var(--ink); margin: 4px 0 0; }
   .card-song-badge { color: var(--gold); }
 
@@ -529,23 +540,27 @@
     return 'low';
   }
 
-  const SONG_MAX = 10;
   const SONGS = [
     { id: 'anthem', label: 'เพลงสรรเสริญพระบารมี' },
     { id: 'schoolSong', label: 'เพลงสดุดีอัสสัมชัญ' },
   ];
-  function getSingingScore(studentId, songId) {
+  function getSingingResult(studentId, songId) {
     const v = state.scores[studentId]?.singingExam?.[songId];
-    return typeof v === 'number' ? v : null;
-  }
-  function singingTotal(studentId) {
-    return SONGS.reduce((sum, s) => {
-      const v = getSingingScore(studentId, s.id);
-      return sum + (v === null ? 0 : v);
-    }, 0);
+    return v === 'pass' || v === 'fail' ? v : null;
   }
   function singingComplete(studentId) {
-    return SONGS.every((s) => getSingingScore(studentId, s.id) !== null);
+    return SONGS.every((s) => getSingingResult(studentId, s.id) !== null);
+  }
+  function singingOverallResult(studentId) {
+    if (!singingComplete(studentId)) return null;
+    return SONGS.every((s) => getSingingResult(studentId, s.id) === 'pass') ? 'pass' : 'fail';
+  }
+  function singingSummaryText(studentId) {
+    const recordedCount = SONGS.filter((s) => getSingingResult(studentId, s.id) !== null).length;
+    if (recordedCount === 0) return 'ยังไม่ประเมิน';
+    if (recordedCount < SONGS.length) return `ประเมินแล้ว ${recordedCount}/${SONGS.length} เพลง`;
+    const passCount = SONGS.filter((s) => getSingingResult(studentId, s.id) === 'pass').length;
+    return passCount === SONGS.length ? 'ผ่านครบทุกเพลง' : `ผ่าน ${passCount}/${SONGS.length} เพลง`;
   }
 
   const state = {
@@ -891,7 +906,7 @@
       const pillClass = verdictTone(tier);
       const passing = isPassing(total, max);
       const hasNote = !!(state.scores[student.id]?.occasions?.[currentOccasion]?.note);
-      const hasSinging = getSingingScore(student.id, SONGS[0].id) !== null || getSingingScore(student.id, SONGS[1].id) !== null;
+      const hasSinging = getSingingResult(student.id, SONGS[0].id) !== null || getSingingResult(student.id, SONGS[1].id) !== null;
       const card = document.createElement('div');
       card.className = 'student-card';
       card.innerHTML = `
@@ -982,18 +997,21 @@
         <textarea id="f-student-note" rows="3" placeholder="สังเกตพฤติกรรมเพิ่มเติม เหตุการณ์เฉพาะ ฯลฯ">${escapeHtml(noteVal)}</textarea>
       </label>
       <div class="singing-section">
-        <h4 class="singing-heading">🎵 คะแนนสอบร้องเพลง</h4>
-        <p class="hint">คะแนนสอบครั้งเดียว ไม่ผูกกับครั้งที่บันทึกจิตพิสัย และไม่นำไปรวมกับคะแนนจิตพิสัยสุทธิ</p>
+        <h4 class="singing-heading">🎵 ผลสอบร้องเพลง</h4>
+        <p class="hint">ผลสอบครั้งเดียว ไม่ผูกกับครั้งที่บันทึกจิตพิสัย และไม่นำไปรวมกับคะแนนจิตพิสัยสุทธิ</p>
         ${SONGS.map((s) => {
-          const v = getSingingScore(studentId, s.id);
+          const v = getSingingResult(studentId, s.id);
           return `
-            <label class="field singing-field">
-              <span>${escapeHtml(s.label)} (เต็ม ${SONG_MAX})</span>
-              <input type="number" class="singing-input" data-song="${s.id}" min="0" max="${SONG_MAX}" step="0.5" value="${v === null ? '' : v}" placeholder="ยังไม่สอบ">
-            </label>
+            <div class="singing-field">
+              <span class="singing-field-label">${escapeHtml(s.label)}</span>
+              <div class="singing-buttons">
+                <button type="button" class="singing-btn pass ${v === 'pass' ? 'active' : ''}" data-song="${s.id}" data-value="pass">ผ่าน</button>
+                <button type="button" class="singing-btn fail ${v === 'fail' ? 'active' : ''}" data-song="${s.id}" data-value="fail">ไม่ผ่าน</button>
+              </div>
+            </div>
           `;
         }).join('')}
-        <p class="singing-total">รวมคะแนนร้องเพลง: <strong>${singingTotal(studentId)}</strong> / ${SONG_MAX * SONGS.length}</p>
+        <p class="singing-total">สรุป: <strong>${singingSummaryText(studentId)}</strong></p>
       </div>
     `;
     modalBody.querySelectorAll('[data-crit]').forEach((btn) => {
@@ -1007,13 +1025,10 @@
     modalBody.querySelector('#f-student-note').addEventListener('change', async (e) => {
       await backend.setStudentNote(studentId, currentOccasion, e.target.value);
     });
-    modalBody.querySelectorAll('.singing-input').forEach((input) => {
-      input.addEventListener('change', async (e) => {
-        const songId = e.target.dataset.song;
-        const raw = e.target.value.trim();
-        let value = raw === '' ? null : parseFloat(raw);
-        if (value !== null && (Number.isNaN(value) || value < 0)) value = 0;
-        if (value !== null && value > SONG_MAX) value = SONG_MAX;
+    modalBody.querySelectorAll('.singing-btn').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const songId = btn.dataset.song;
+        const value = btn.dataset.value;
         await backend.setSingingScore(studentId, songId, value);
         if (modal.open) renderStudentModalBody(studentId);
       });
@@ -1110,11 +1125,16 @@
           <td>${verdict}</td>
           <td class="${passing ? 'pass' : 'fail'}">${passing ? 'ผ่าน' : 'ไม่ผ่าน'}</td>
           <td>${trend}</td>
-          ${SONGS.map((song) => {
-            const v = getSingingScore(s.id, song.id);
-            return `<td class="num sep">${v === null ? '-' : v}</td>`;
+          ${SONGS.map((song, i) => {
+            const v = getSingingResult(s.id, song.id);
+            const cls = v === null ? '' : v === 'pass' ? 'pass' : 'fail';
+            return `<td class="${cls}${i === 0 ? ' sep' : ''}">${v === null ? '-' : v === 'pass' ? 'ผ่าน' : 'ไม่ผ่าน'}</td>`;
           }).join('')}
-          <td class="num">${singingComplete(s.id) ? singingTotal(s.id) : '-'}</td>
+          ${(() => {
+            const overall = singingOverallResult(s.id);
+            const cls = overall === null ? '' : overall === 'pass' ? 'pass' : 'fail';
+            return `<td class="${cls}">${overall === null ? '-' : overall === 'pass' ? 'ผ่าน' : 'ไม่ผ่าน'}</td>`;
+          })()}
         </tr>
       `;
     }).join('');
@@ -1123,7 +1143,7 @@
         คะแนนจิตพิสัยสุทธิคำนวณจากค่าเฉลี่ยของทั้ง 4 ครั้ง (แต่ละครั้งเต็ม ${maxTotal()}) แล้วปรับสัดส่วนให้เต็ม 10 คะแนนตามหลักสูตร ·
         ต้องได้ไม่ต่ำกว่า ${FINAL_PASS_SCORE} คะแนนจึงจะถือว่าผ่านเกณฑ์ (ต่ำกว่า ${FINAL_PASS_SCORE} = ไม่ผ่าน) ·
         ผ่านเกณฑ์ ${passCount}/${state.students.length} คน · แนวโน้มเทียบครั้งที่ 4 กับครั้งที่ 1 ·
-        คะแนนสอบร้องเพลง (คอลัมน์ขวาสุด) เป็นคะแนนแยกต่างหาก ไม่รวมกับคะแนนจิตพิสัยสุทธิ
+        ผลสอบร้องเพลง (คอลัมน์ขวาสุด) เป็นผลแยกต่างหาก ไม่รวมกับคะแนนจิตพิสัยสุทธิ
       </p>
       <div class="table-scroll">
         <table class="summary-table">
@@ -1132,8 +1152,8 @@
               <th>เลขที่</th><th>รหัสประจำตัวนักเรียน</th>
               ${OCCASIONS.map((occ) => `<th>ครั้งที่ ${occ}</th>`).join('')}
               <th>คะแนนสุทธิ /10</th><th>ระดับ</th><th>ผล</th><th>แนวโน้ม</th>
-              ${SONGS.map((song) => `<th class="sep">${escapeHtml(song.label)} /${SONG_MAX}</th>`).join('')}
-              <th>รวมร้องเพลง /${SONG_MAX * SONGS.length}</th>
+              ${SONGS.map((song, i) => `<th${i === 0 ? ' class="sep"' : ''}>${escapeHtml(song.label)}</th>`).join('')}
+              <th>ผลรวมร้องเพลง</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
@@ -1195,8 +1215,8 @@
       header.push(`ครั้งที่${occ}_บันทึกพฤติกรรม`);
     });
     header.push('คะแนนสุทธิ_เต็ม10', 'ระดับสุทธิ', 'ผลสุทธิ', 'แนวโน้ม');
-    SONGS.forEach((song) => header.push(`ร้องเพลง_${song.label}_เต็ม${SONG_MAX}`));
-    header.push(`รวมร้องเพลง_เต็ม${SONG_MAX * SONGS.length}`);
+    SONGS.forEach((song) => header.push(`ร้องเพลง_${song.label}`));
+    header.push('ผลรวมร้องเพลง');
     const rows = [header];
     sortStudents(state.students).forEach((s) => {
       const row = [s.number, s.code || ''];
@@ -1215,10 +1235,11 @@
       const { finalScore, verdict, passing, trend } = finalSummary(s.id);
       row.push(finalScore.toFixed(1), verdict, passing ? 'ผ่าน' : 'ไม่ผ่าน', trend);
       SONGS.forEach((song) => {
-        const v = getSingingScore(s.id, song.id);
-        row.push(v === null ? '' : String(v));
+        const v = getSingingResult(s.id, song.id);
+        row.push(v === null ? '' : v === 'pass' ? 'ผ่าน' : 'ไม่ผ่าน');
       });
-      row.push(singingComplete(s.id) ? String(singingTotal(s.id)) : '');
+      const overall = singingOverallResult(s.id);
+      row.push(overall === null ? '' : overall === 'pass' ? 'ผ่าน' : 'ไม่ผ่าน');
       rows.push(row);
     });
     const csv = rows.map((r) => r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\r\n');
