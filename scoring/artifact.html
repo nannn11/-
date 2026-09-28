@@ -297,7 +297,8 @@
     min-width: 100px;
     text-align: right;
   }
-  .row-verdict.fail { color: var(--negative); }
+  .row-verdict.mid { color: var(--gold); }
+  .row-verdict.low { color: var(--negative); }
 
   .empty-hint { text-align: center; color: var(--muted); padding: 26px; }
 
@@ -466,6 +467,7 @@
           <textarea id="occasionNoteInput" rows="3" placeholder="เช่น เนื้อหาที่สอน กิจกรรมที่ทำ บริบทของคาบเก็บข้อมูลครั้งนี้..."></textarea>
         </label>
         <button type="button" id="btnSaveOccasionNote" class="btn btn-secondary btn-save-note">💾 บันทึก</button>
+        <button type="button" id="btnEditOccasionNote" class="btn btn-ghost btn-save-note hidden">✏️ แก้ไข</button>
       </div>
       <div class="field-with-save">
         <label class="field">
@@ -473,6 +475,7 @@
           <textarea id="postTeachingNoteInput" rows="3" placeholder="เช่น ข้อสังเกตหลังสอน ปัญหาที่พบ สิ่งที่ควรปรับปรุงครั้งถัดไป..."></textarea>
         </label>
         <button type="button" id="btnSavePostTeachingNote" class="btn btn-secondary btn-save-note">💾 บันทึก</button>
+        <button type="button" id="btnEditPostTeachingNote" class="btn btn-ghost btn-save-note hidden">✏️ แก้ไข</button>
       </div>
       <p class="hint">แตะที่กล่องนักเรียนเพื่อปรับคะแนนแต่ละหัวข้อและบันทึกพฤติกรรมของครั้งนี้ (เริ่มต้นเต็ม 5 คะแนนต่อข้อ)</p>
       <div id="studentRows" class="roster-list"></div>
@@ -539,7 +542,6 @@
     if (pct >= 0.5) return 'พอใช้';
     return 'ควรปรับปรุง';
   }
-  function isPassing(score, max) { return max > 0 && score / max >= 0.5; }
   const FINAL_PASS_SCORE = 7;
   function isPassingFinal(finalScore) { return finalScore >= FINAL_PASS_SCORE; }
   function verdictTone(tier) {
@@ -579,7 +581,9 @@
     criteria: [],
     occasionDates: { 1: '', 2: '', 3: '', 4: '' },
     occasionNotes: { 1: '', 2: '', 3: '', 4: '' },
+    occasionNoteLocked: { 1: false, 2: false, 3: false, 4: false },
     postTeachingNotes: { 1: '', 2: '', 3: '', 4: '' },
+    postTeachingNoteLocked: { 1: false, 2: false, 3: false, 4: false },
     scores: {},
   };
   let currentOccasion = 1;
@@ -684,7 +688,9 @@
       localStorage.setItem(LOCAL_KEY, JSON.stringify({
         className: state.className, teacher: state.teacher, students: state.students,
         criteria: state.criteria, occasionDates: state.occasionDates, occasionNotes: state.occasionNotes,
-        postTeachingNotes: state.postTeachingNotes, scores: state.scores,
+        occasionNoteLocked: state.occasionNoteLocked,
+        postTeachingNotes: state.postTeachingNotes, postTeachingNoteLocked: state.postTeachingNoteLocked,
+        scores: state.scores,
       }));
     }
     return {
@@ -698,7 +704,9 @@
           state.criteria = Array.isArray(loaded.criteria) ? loaded.criteria : DEFAULT_CRITERIA;
           state.occasionDates = loaded.occasionDates || { 1: '', 2: '', 3: '', 4: '' };
           state.occasionNotes = loaded.occasionNotes || { 1: '', 2: '', 3: '', 4: '' };
+          state.occasionNoteLocked = loaded.occasionNoteLocked || { 1: false, 2: false, 3: false, 4: false };
           state.postTeachingNotes = loaded.postTeachingNotes || { 1: '', 2: '', 3: '', 4: '' };
+          state.postTeachingNoteLocked = loaded.postTeachingNoteLocked || { 1: false, 2: false, 3: false, 4: false };
           state.scores = loaded.scores || {};
         } else {
           state.criteria = DEFAULT_CRITERIA;
@@ -741,9 +749,17 @@
         state.occasionNotes = { ...state.occasionNotes, [occasionNum]: text };
         persist();
       },
+      async setOccasionNoteLock(occasionNum, locked) {
+        state.occasionNoteLocked = { ...state.occasionNoteLocked, [occasionNum]: locked };
+        persist(); render();
+      },
       async setPostTeachingNote(occasionNum, text) {
         state.postTeachingNotes = { ...state.postTeachingNotes, [occasionNum]: text };
         persist();
+      },
+      async setPostTeachingNoteLock(occasionNum, locked) {
+        state.postTeachingNoteLocked = { ...state.postTeachingNoteLocked, [occasionNum]: locked };
+        persist(); render();
       },
       async updateStudentInfo(studentId, patch) {
         state.students = state.students.map((s) => (s.id === studentId ? { ...s, ...patch } : s));
@@ -756,7 +772,9 @@
         state.criteria = Array.isArray(data.criteria) ? data.criteria : DEFAULT_CRITERIA;
         state.occasionDates = data.occasionDates || { 1: '', 2: '', 3: '', 4: '' };
         state.occasionNotes = data.occasionNotes || { 1: '', 2: '', 3: '', 4: '' };
+        state.occasionNoteLocked = data.occasionNoteLocked || { 1: false, 2: false, 3: false, 4: false };
         state.postTeachingNotes = data.postTeachingNotes || { 1: '', 2: '', 3: '', 4: '' };
+        state.postTeachingNoteLocked = data.postTeachingNoteLocked || { 1: false, 2: false, 3: false, 4: false };
         state.scores = data.scores || {};
         persist(); render();
       },
@@ -779,24 +797,41 @@
       render();
     }, () => { syncBadge.textContent = 'ออฟไลน์ชั่วคราว'; syncBadge.classList.remove('live'); });
 
+    const CONFIG_DEFAULTS = {
+      criteria: DEFAULT_CRITERIA,
+      occasionDates: { 1: '', 2: '', 3: '', 4: '' },
+      occasionNotes: { 1: '', 2: '', 3: '', 4: '' },
+      occasionNoteLocked: { 1: false, 2: false, 3: false, 4: false },
+      postTeachingNotes: { 1: '', 2: '', 3: '', 4: '' },
+      postTeachingNoteLocked: { 1: false, 2: false, 3: false, 4: false },
+    };
+    function currentConfigDoc(overrides) {
+      return {
+        criteria: state.criteria,
+        occasionDates: state.occasionDates,
+        occasionNotes: state.occasionNotes,
+        occasionNoteLocked: state.occasionNoteLocked,
+        postTeachingNotes: state.postTeachingNotes,
+        postTeachingNoteLocked: state.postTeachingNoteLocked,
+        ...overrides,
+      };
+    }
+
     configDoc.onSnapshot((snap) => {
       if (!snap.exists) {
         if (!configSeeded) {
           configSeeded = true;
-          configDoc.set({
-            criteria: DEFAULT_CRITERIA,
-            occasionDates: { 1: '', 2: '', 3: '', 4: '' },
-            occasionNotes: { 1: '', 2: '', 3: '', 4: '' },
-            postTeachingNotes: { 1: '', 2: '', 3: '', 4: '' },
-          });
+          configDoc.set(CONFIG_DEFAULTS);
         }
         return;
       }
       const d = snap.data();
       state.criteria = Array.isArray(d.criteria) ? d.criteria : DEFAULT_CRITERIA;
-      state.occasionDates = d.occasionDates || { 1: '', 2: '', 3: '', 4: '' };
-      state.occasionNotes = d.occasionNotes || { 1: '', 2: '', 3: '', 4: '' };
-      state.postTeachingNotes = d.postTeachingNotes || { 1: '', 2: '', 3: '', 4: '' };
+      state.occasionDates = d.occasionDates || CONFIG_DEFAULTS.occasionDates;
+      state.occasionNotes = d.occasionNotes || CONFIG_DEFAULTS.occasionNotes;
+      state.occasionNoteLocked = d.occasionNoteLocked || CONFIG_DEFAULTS.occasionNoteLocked;
+      state.postTeachingNotes = d.postTeachingNotes || CONFIG_DEFAULTS.postTeachingNotes;
+      state.postTeachingNoteLocked = d.postTeachingNoteLocked || CONFIG_DEFAULTS.postTeachingNoteLocked;
       render();
     });
 
@@ -811,11 +846,10 @@
       mode: 'db',
       async init() {},
       async setCriteria(newList) {
-        await configDoc.set({ criteria: newList, occasionDates: state.occasionDates, occasionNotes: state.occasionNotes, postTeachingNotes: state.postTeachingNotes });
+        await configDoc.set(currentConfigDoc({ criteria: newList }));
       },
       async setOccasionDate(occasionNum, dateStr) {
-        const newDates = { ...state.occasionDates, [occasionNum]: dateStr };
-        await configDoc.set({ criteria: state.criteria, occasionDates: newDates, occasionNotes: state.occasionNotes, postTeachingNotes: state.postTeachingNotes });
+        await configDoc.set(currentConfigDoc({ occasionDates: { ...state.occasionDates, [occasionNum]: dateStr } }));
       },
       async setScore(studentId, occasionNum, criterionId, value) {
         const current = state.scores[studentId] || { occasions: {} };
@@ -844,12 +878,16 @@
         await scoresCol.doc(studentId).set({ ...current, singingExam });
       },
       async setOccasionNote(occasionNum, text) {
-        const newNotes = { ...state.occasionNotes, [occasionNum]: text };
-        await configDoc.set({ criteria: state.criteria, occasionDates: state.occasionDates, occasionNotes: newNotes, postTeachingNotes: state.postTeachingNotes });
+        await configDoc.set(currentConfigDoc({ occasionNotes: { ...state.occasionNotes, [occasionNum]: text } }));
+      },
+      async setOccasionNoteLock(occasionNum, locked) {
+        await configDoc.set(currentConfigDoc({ occasionNoteLocked: { ...state.occasionNoteLocked, [occasionNum]: locked } }));
       },
       async setPostTeachingNote(occasionNum, text) {
-        const newNotes = { ...state.postTeachingNotes, [occasionNum]: text };
-        await configDoc.set({ criteria: state.criteria, occasionDates: state.occasionDates, occasionNotes: state.occasionNotes, postTeachingNotes: newNotes });
+        await configDoc.set(currentConfigDoc({ postTeachingNotes: { ...state.postTeachingNotes, [occasionNum]: text } }));
+      },
+      async setPostTeachingNoteLock(occasionNum, locked) {
+        await configDoc.set(currentConfigDoc({ postTeachingNoteLocked: { ...state.postTeachingNoteLocked, [occasionNum]: locked } }));
       },
       async updateStudentInfo(studentId, patch) {
         const students = state.students.map((s) => (s.id === studentId ? { ...s, ...patch } : s));
@@ -866,9 +904,11 @@
         }
         writes.push(configDoc.set({
           criteria: Array.isArray(data.criteria) ? data.criteria : DEFAULT_CRITERIA,
-          occasionDates: data.occasionDates || { 1: '', 2: '', 3: '', 4: '' },
-          occasionNotes: data.occasionNotes || { 1: '', 2: '', 3: '', 4: '' },
-          postTeachingNotes: data.postTeachingNotes || { 1: '', 2: '', 3: '', 4: '' },
+          occasionDates: data.occasionDates || CONFIG_DEFAULTS.occasionDates,
+          occasionNotes: data.occasionNotes || CONFIG_DEFAULTS.occasionNotes,
+          occasionNoteLocked: data.occasionNoteLocked || CONFIG_DEFAULTS.occasionNoteLocked,
+          postTeachingNotes: data.postTeachingNotes || CONFIG_DEFAULTS.postTeachingNotes,
+          postTeachingNoteLocked: data.postTeachingNoteLocked || CONFIG_DEFAULTS.postTeachingNoteLocked,
         }));
         const byStudent = data.scores || {};
         Object.keys(byStudent).forEach((studentId) => {
@@ -909,12 +949,11 @@
         return btn;
       });
     }
-    const max = maxTotal();
     OCCASIONS.forEach((occ, i) => {
       const btn = occasionTabButtons[i];
       btn.className = 'occasion-tab' + (occ === currentOccasion ? ' active' : '');
-      const passCount = state.students.filter((s) => isPassing(occasionSummary(s.id, occ).total, max)).length;
-      const check = state.students.length > 0 && passCount === state.students.length ? '<span class="tab-check">✓</span>' : '';
+      const lockedCount = state.students.filter((s) => !!state.scores[s.id]?.occasions?.[occ]?.locked).length;
+      const check = state.students.length > 0 && lockedCount === state.students.length ? '<span class="tab-check">✓</span>' : '';
       btn.innerHTML = `${check}ครั้งที่ ${occ}`;
     });
   }
@@ -922,14 +961,23 @@
   function renderMainView() {
     occasionTitleEl.textContent = `ครั้งที่ ${currentOccasion}`;
     const max = maxTotal();
-    const passCount = state.students.filter((s) => isPassing(occasionSummary(s.id, currentOccasion).total, max)).length;
+    const lockedCount = state.students.filter((s) => !!state.scores[s.id]?.occasions?.[currentOccasion]?.locked).length;
     const teacherText = state.teacher ? ` · ครูประจำชั้น ${state.teacher}` : '';
-    occasionMetaEl.textContent = `${state.students.length} คน · ผ่านเกณฑ์ ${passCount}/${state.students.length} คน · คะแนนเต็ม ${max} (เริ่มต้นเต็มทุกคน หักเมื่อมีพฤติกรรมไม่พึงประสงค์)${teacherText}`;
+    occasionMetaEl.textContent = `${state.students.length} คน · บันทึกแล้ว ${lockedCount}/${state.students.length} คน · คะแนนเต็ม ${max} (เริ่มต้นเต็มทุกคน หักเมื่อมีพฤติกรรมไม่พึงประสงค์)${teacherText}`;
     occasionDateInput.value = state.occasionDates[currentOccasion] || '';
     occasionNoteLabel.textContent = `รายละเอียดการเรียนการสอน/กิจกรรมในคาบนี้ (ครั้งที่ ${currentOccasion})`;
     occasionNoteInput.value = state.occasionNotes[currentOccasion] || '';
+    const noteLocked = !!state.occasionNoteLocked[currentOccasion];
+    occasionNoteInput.disabled = noteLocked;
+    document.getElementById('btnSaveOccasionNote').classList.toggle('hidden', noteLocked);
+    document.getElementById('btnEditOccasionNote').classList.toggle('hidden', !noteLocked);
+
     postTeachingNoteLabel.textContent = `บันทึกหลังการสอน (ครั้งที่ ${currentOccasion})`;
     postTeachingNoteInput.value = state.postTeachingNotes[currentOccasion] || '';
+    const postNoteLocked = !!state.postTeachingNoteLocked[currentOccasion];
+    postTeachingNoteInput.disabled = postNoteLocked;
+    document.getElementById('btnSavePostTeachingNote').classList.toggle('hidden', postNoteLocked);
+    document.getElementById('btnEditPostTeachingNote').classList.toggle('hidden', !postNoteLocked);
 
     const q = searchQuery.trim().toLowerCase();
     const filtered = state.students.filter((s) => !q || s.number.toLowerCase().includes(q) || String(s.code || '').toLowerCase().includes(q));
@@ -942,7 +990,6 @@
       const { total } = occasionSummary(student.id, currentOccasion);
       const tier = verdictFor(total, max);
       const pillClass = verdictTone(tier);
-      const passing = isPassing(total, max);
       const occasionRec = state.scores[student.id]?.occasions?.[currentOccasion];
       const hasNote = !!occasionRec?.note;
       const isLocked = !!occasionRec?.locked;
@@ -958,7 +1005,7 @@
           ${hasSinging ? `<span class="card-song-badge" title="มีคะแนนสอบร้องเพลงแล้ว">🎵</span>` : ''}
         </span>
         <span class="row-score ${pillClass}">${total}<span class="row-of">/${max}</span></span>
-        <span class="row-verdict ${passing ? '' : 'fail'}">${tier} · ${passing ? 'ผ่าน' : 'ไม่ผ่าน'}</span>
+        <span class="row-verdict ${pillClass}">${tier}</span>
       `;
       row.addEventListener('click', () => openStudentModal(student.id));
       studentRowsEl.appendChild(row);
@@ -1021,7 +1068,6 @@
     const { total } = occasionSummary(studentId, currentOccasion);
     const max = maxTotal();
     const tier = verdictFor(total, max);
-    const passing = isPassing(total, max);
     const rows = state.criteria.map((c) => {
       const val = getCriterionScore(rec, c.id);
       const desc = (c.descriptions && c.descriptions[val]) || '';
@@ -1040,7 +1086,7 @@
     modalBody.innerHTML = `
       <div class="score-total-banner">
         คะแนนรวมครั้งที่ ${currentOccasion}: <strong>${total}</strong> / ${max}
-        · <strong class="${passing ? '' : 'negative'}">${tier}</strong> (${passing ? 'ผ่าน' : 'ไม่ผ่าน'})
+        · <strong>${tier}</strong>
         ${locked ? ' · 🔒 ล็อกแล้ว' : ''}
       </div>
       <p class="hint">${locked ? 'ข้อมูลครั้งนี้ถูกล็อกแล้ว กด "✏️ แก้ไข" ด้านล่างเพื่อแก้ไขคะแนนอีกครั้ง' : 'เริ่มต้นทุกหัวข้อเต็มคะแนน (5) แตะระดับที่ตรงกับพฤติกรรมเพื่อปรับ/หักคะแนน'}</p>
@@ -1276,7 +1322,9 @@
     const data = {
       className: state.className, teacher: state.teacher, students: state.students,
       criteria: state.criteria, occasionDates: state.occasionDates, occasionNotes: state.occasionNotes,
-      postTeachingNotes: state.postTeachingNotes, scores: state.scores,
+      occasionNoteLocked: state.occasionNoteLocked,
+      postTeachingNotes: state.postTeachingNotes, postTeachingNoteLocked: state.postTeachingNoteLocked,
+      scores: state.scores,
     };
     await saveFile(`วิจัยจิตพิสัย-ป1-3-backup-${todayStr()}.json`, JSON.stringify(data, null, 2), 'application/json');
   }
@@ -1357,11 +1405,19 @@
   });
   document.getElementById('btnSaveOccasionNote').addEventListener('click', async () => {
     await backend.setOccasionNote(currentOccasion, occasionNoteInput.value);
-    showToast('บันทึกรายละเอียดการสอนแล้ว');
+    await backend.setOccasionNoteLock(currentOccasion, true);
+    showToast('บันทึกและล็อกรายละเอียดการสอนแล้ว');
+  });
+  document.getElementById('btnEditOccasionNote').addEventListener('click', async () => {
+    await backend.setOccasionNoteLock(currentOccasion, false);
   });
   document.getElementById('btnSavePostTeachingNote').addEventListener('click', async () => {
     await backend.setPostTeachingNote(currentOccasion, postTeachingNoteInput.value);
-    showToast('บันทึกข้อมูลหลังการสอนแล้ว');
+    await backend.setPostTeachingNoteLock(currentOccasion, true);
+    showToast('บันทึกและล็อกข้อมูลหลังการสอนแล้ว');
+  });
+  document.getElementById('btnEditPostTeachingNote').addEventListener('click', async () => {
+    await backend.setPostTeachingNoteLock(currentOccasion, false);
   });
 
   // ---------- Boot ----------
