@@ -544,9 +544,17 @@
   }
   const FINAL_PASS_SCORE = 7;
   function isPassingFinal(finalScore) { return finalScore >= FINAL_PASS_SCORE; }
-  function verdictTone(tier) {
-    if (tier === 'ดีเยี่ยม' || tier === 'ดีมาก') return '';
-    if (tier === 'ดี' || tier === 'พอใช้') return 'mid';
+
+  function occasionTier(score, max) {
+    if (max <= 0) return null;
+    const pct = score / max;
+    if (pct >= 0.8) return 'ดี';
+    if (pct >= 0.5) return 'พอใช้';
+    return 'ควรปรับปรุง';
+  }
+  function occasionTone(tier) {
+    if (tier === 'ดี') return '';
+    if (tier === 'พอใช้') return 'mid';
     return 'low';
   }
 
@@ -988,8 +996,8 @@
 
     sorted.forEach((student) => {
       const { total } = occasionSummary(student.id, currentOccasion);
-      const tier = verdictFor(total, max);
-      const pillClass = verdictTone(tier);
+      const tier = occasionTier(total, max);
+      const pillClass = occasionTone(tier);
       const occasionRec = state.scores[student.id]?.occasions?.[currentOccasion];
       const hasNote = !!occasionRec?.note;
       const isLocked = !!occasionRec?.locked;
@@ -1067,7 +1075,7 @@
     const locked = !!occasionRec.locked;
     const { total } = occasionSummary(studentId, currentOccasion);
     const max = maxTotal();
-    const tier = verdictFor(total, max);
+    const tier = occasionTier(total, max);
     const rows = state.criteria.map((c) => {
       const val = getCriterionScore(rec, c.id);
       const desc = (c.descriptions && c.descriptions[val]) || '';
