@@ -1,0 +1,1444 @@
+<title>วิจัยจิตพิสัย ป.1/3</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@600;700&family=Noto+Sans+Thai:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --ink: #24262b;
+    --muted: #746f62;
+    --paper: #f5f2ea;
+    --surface: #ffffff;
+    --surface-2: #ede8db;
+    --line: #e2dac0;
+    --accent: #2c4a5e;
+    --accent-strong: #1c3241;
+    --accent-soft: #dfe7ea;
+    --gold: #b9812c;
+    --positive: #3d8361;
+    --positive-soft: #e2f0e8;
+    --negative: #b0403e;
+    --negative-soft: #f7e3e2;
+    --shadow: 0 8px 24px rgba(40, 34, 20, 0.08);
+    --radius: 14px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ece7db;
+      --muted: #a49d8b;
+      --paper: #1a1b1f;
+      --surface: #232429;
+      --surface-2: #2b2c33;
+      --line: #3a3b42;
+      --accent: #7fa3b8;
+      --accent-strong: #9dbccd;
+      --accent-soft: #2a3944;
+      --gold: #d9ab52;
+      --positive: #6ec394;
+      --positive-soft: #203028;
+      --negative: #e08886;
+      --negative-soft: #3a2524;
+      --shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ece7db;
+    --muted: #a49d8b;
+    --paper: #1a1b1f;
+    --surface: #232429;
+    --surface-2: #2b2c33;
+    --line: #3a3b42;
+    --accent: #7fa3b8;
+    --accent-strong: #9dbccd;
+    --accent-soft: #2a3944;
+    --gold: #d9ab52;
+    --positive: #6ec394;
+    --positive-soft: #203028;
+    --negative: #e08886;
+    --negative-soft: #3a2524;
+    --shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Noto Sans Thai', 'Segoe UI', sans-serif;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
+    font-weight: 700;
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  .hidden { display: none !important; }
+
+  .app {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 22px 18px 70px;
+  }
+
+  .topbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+
+  .brand {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .brand-mark {
+    font-size: 1.6rem;
+    line-height: 1;
+    margin-top: 2px;
+  }
+
+  .brand h1 {
+    font-size: 1.3rem;
+  }
+
+  .brand-sub {
+    color: var(--accent);
+  }
+
+  .tagline {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+
+  .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .sync-badge {
+    font-size: 0.76rem;
+    color: var(--muted);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    padding: 5px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .sync-badge.live {
+    color: var(--positive);
+    border-color: var(--positive);
+    background: var(--positive-soft);
+  }
+
+  .btn {
+    font-family: inherit;
+    font-size: 0.88rem;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-strong); }
+  .btn-secondary { background: var(--accent-soft); color: var(--accent-strong); }
+  .btn-secondary:hover { filter: brightness(0.97); }
+  .btn-ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+  .btn-ghost:hover { background: var(--surface-2); }
+  .btn-danger { background: var(--negative); color: #fff; }
+  .btn-danger:hover { filter: brightness(0.92); }
+  .btn-icon {
+    background: transparent; border: 1px solid transparent; cursor: pointer;
+    font-size: 1rem; padding: 4px 6px; border-radius: 6px; line-height: 1;
+  }
+  .btn-icon:hover { background: var(--surface-2); }
+  button:focus-visible, input:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+
+  .occasion-tabs {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 4px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 18px;
+    padding-bottom: 1px;
+  }
+  .occasion-tab {
+    font-family: inherit;
+    font-size: 0.88rem;
+    padding: 9px 14px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .occasion-tab.active {
+    color: var(--accent-strong);
+    border-bottom-color: var(--gold);
+    font-weight: 600;
+  }
+  .occasion-tab .tab-check { color: var(--positive); margin-right: 4px; }
+
+  .state-message {
+    text-align: center;
+    color: var(--muted);
+    padding: 70px 20px;
+  }
+
+  .main-view {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+  }
+
+  .view-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .view-identity h2 { font-size: 1.2rem; }
+  .view-meta {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 0.84rem;
+  }
+
+  .toolbar-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+
+  #searchInput, #occasionDateInput {
+    font-family: inherit;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink);
+  }
+  #searchInput { min-width: 170px; }
+
+  .date-field {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.84rem;
+    color: var(--muted);
+  }
+
+  .roster-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .student-row {
+    position: relative;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    transition: border-color 0.15s;
+  }
+  .student-row:hover { border-color: var(--accent); }
+  .card-number {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 0.76rem;
+    color: var(--muted);
+    background: var(--surface-2);
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+  .row-code {
+    font-weight: 600;
+    font-size: 0.9rem;
+    flex: 1;
+    min-width: 90px;
+  }
+  .row-badges { display: flex; gap: 4px; font-size: 0.86rem; }
+  .row-score {
+    text-align: right;
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--positive);
+  }
+  .row-score.mid { color: var(--gold); }
+  .row-score.low { color: var(--negative); }
+  .row-of { color: var(--muted); font-weight: 400; font-size: 0.76rem; }
+  .row-verdict {
+    color: var(--positive);
+    font-size: 0.76rem;
+    font-weight: 600;
+    min-width: 100px;
+    text-align: right;
+  }
+  .row-verdict.mid { color: var(--gold); }
+  .row-verdict.low { color: var(--negative); }
+
+  .empty-hint { text-align: center; color: var(--muted); padding: 26px; }
+
+  .toast {
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+    background: var(--ink); color: var(--paper);
+    padding: 10px 18px; border-radius: 999px; font-size: 0.86rem;
+    box-shadow: var(--shadow); z-index: 60;
+  }
+
+  dialog#modal {
+    border: none; border-radius: var(--radius); padding: 0;
+    width: min(560px, 92vw); max-height: 88vh;
+    color: var(--ink); background: var(--surface);
+  }
+  dialog#modal.wide { width: min(920px, 96vw); }
+  dialog#modal::backdrop { background: rgba(20, 18, 10, 0.55); }
+  #modalForm { display: flex; flex-direction: column; max-height: 88vh; }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 18px; border-bottom: 1px solid var(--line);
+  }
+  .modal-header h3 { font-size: 1.02rem; }
+  .modal-body { padding: 16px 18px; overflow-y: auto; }
+  .modal-footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; padding: 14px 18px; border-top: 1px solid var(--line); }
+
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; font-size: 0.88rem; }
+  .field span { color: var(--muted); font-size: 0.8rem; }
+  .field input, .field textarea {
+    font-family: inherit; font-size: 0.94rem; padding: 9px 11px; border-radius: 8px;
+    border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+    resize: vertical;
+  }
+  .field textarea:disabled { background: var(--surface-2); color: var(--muted); cursor: not-allowed; }
+  .hint { font-size: 0.84rem; color: var(--muted); margin: 0 0 12px; }
+
+  .field-with-save { margin-bottom: 14px; }
+  .field-with-save .field { margin-bottom: 6px; }
+  .btn-save-note { display: block; margin-left: auto; }
+
+  .score-total-banner { background: var(--surface-2); padding: 10px 14px; border-radius: 8px; margin-bottom: 14px; font-size: 0.94rem; }
+
+  .criterion-row-wrap { margin-bottom: 10px; }
+  .criterion-row {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 10px; background: var(--surface-2); border-radius: 8px 8px 0 0;
+  }
+  .criterion-label { font-size: 0.86rem; font-weight: 600; }
+  .level-buttons { display: flex; gap: 5px; flex-shrink: 0; }
+  .level-btn {
+    width: 30px; height: 30px; border-radius: 7px; border: 1px solid var(--line);
+    background: var(--surface); color: var(--ink); font-weight: 700; font-size: 0.85rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .level-btn:hover { background: var(--accent-soft); }
+  .level-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .level-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+  .level-btn:disabled:hover { background: var(--surface); }
+  .level-btn.active:disabled:hover { background: var(--accent); }
+  .criterion-desc {
+    margin: 0; padding: 8px 10px; background: var(--surface-2); border-radius: 0 0 8px 8px;
+    border-top: 1px dashed var(--line); font-size: 0.8rem; color: var(--muted);
+  }
+
+  .criteria-card {
+    border: 1px solid var(--line); border-radius: 10px; padding: 10px; margin-bottom: 14px;
+  }
+  .criteria-list-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px; background: var(--surface-2); border-radius: 8px; margin-bottom: 8px;
+  }
+  .criteria-title-input { font-weight: 600; }
+  .criteria-input {
+    flex: 1; font-family: inherit; font-size: 0.9rem; padding: 6px 8px; border-radius: 6px;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  }
+  .criteria-level-row {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 0.82rem; color: var(--muted);
+  }
+  .criteria-level-row span { flex-shrink: 0; width: 78px; }
+
+  .singing-section { margin-top: 18px; padding-top: 14px; border-top: 2px dashed var(--line); }
+  .singing-heading { margin: 0 0 4px; font-size: 0.98rem; }
+  .singing-field {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px;
+    margin-bottom: 8px;
+  }
+  .singing-field-label { font-size: 0.86rem; font-weight: 600; }
+  .singing-buttons { display: flex; gap: 6px; flex-shrink: 0; }
+  .singing-btn {
+    padding: 6px 12px; border-radius: 7px; border: 1px solid var(--line);
+    background: var(--surface); color: var(--ink); font-weight: 600; font-size: 0.82rem; cursor: pointer;
+  }
+  .singing-btn:hover { background: var(--accent-soft); }
+  .singing-btn.pass.active { background: var(--positive); color: #fff; border-color: var(--positive); }
+  .singing-btn.fail.active { background: var(--negative); color: #fff; border-color: var(--negative); }
+  .singing-total { font-size: 0.88rem; color: var(--ink); margin: 4px 0 0; }
+  .card-song-badge { color: var(--gold); }
+
+  .table-scroll { overflow-x: auto; }
+  .summary-table { width: 100%; border-collapse: collapse; min-width: 640px; }
+  .summary-table th, .summary-table td {
+    padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left;
+    font-size: 0.84rem; white-space: nowrap;
+  }
+  .summary-table th { color: var(--muted); font-weight: 600; }
+  .summary-table td.num { font-variant-numeric: tabular-nums; text-align: center; }
+  .summary-table td.pass { color: var(--positive); font-weight: 600; }
+  .summary-table td.fail { color: var(--negative); font-weight: 600; }
+
+  @media (max-width: 640px) {
+    .view-toolbar { flex-direction: column; align-items: stretch; }
+    .toolbar-actions { justify-content: flex-start; }
+    #searchInput { flex: 1; min-width: 0; }
+  }
+</style>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">🔬</span>
+      <div>
+        <h1>เครื่องมือวิจัยจิตพิสัย <span class="brand-sub">ป.1/3</span></h1>
+        <p class="tagline">บันทึกคะแนนความประพฤตินักเรียน 40 คน · 4 ครั้ง</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <span id="syncBadge" class="sync-badge">กำลังเชื่อมต่อ…</span>
+      <button id="btnCriteria" class="btn btn-secondary" title="ตั้งค่าหัวข้อประเมิน">⚙️ หัวข้อประเมิน</button>
+      <button id="btnSummary" class="btn btn-secondary" title="สรุปผลรวม 4 ครั้ง และคะแนนจิตพิสัยสุทธิ (เต็ม 10)">📊 สรุปผลรวม</button>
+      <button id="btnSingingSummary" class="btn btn-secondary" title="สรุปผลสอบร้องเพลง แยกจากคะแนนจิตพิสัย">🎵 สรุปผลร้องเพลง</button>
+      <button id="btnExportCsv" class="btn btn-ghost" title="ส่งออกข้อมูลทั้ง 4 ครั้งเป็น CSV สำหรับวิเคราะห์">⬇️ CSV</button>
+      <button id="btnExport" class="btn btn-ghost" title="สำรองข้อมูลทั้งหมดเป็นไฟล์ JSON">💾 สำรองข้อมูล</button>
+      <label class="btn btn-ghost" title="กู้คืนข้อมูลจากไฟล์ JSON">
+        ⬆️ กู้คืนข้อมูล
+        <input type="file" id="importFile" accept="application/json" hidden>
+      </label>
+    </div>
+  </header>
+
+  <nav class="occasion-tabs" id="occasionTabs" aria-label="ครั้งที่บันทึก"></nav>
+
+  <main>
+    <div id="loadingState" class="state-message">กำลังโหลดข้อมูล…</div>
+    <div id="emptyState" class="state-message hidden">
+      <p>ยังไม่พบข้อมูลนักเรียน ป.1/3 — เปิดผ่านลิงก์นี้บน claude.ai เพื่อดึงข้อมูลอัตโนมัติ หรือกู้คืนจากไฟล์สำรอง</p>
+    </div>
+
+    <section id="mainView" class="main-view hidden">
+      <div class="view-toolbar">
+        <div class="view-identity">
+          <h2 id="occasionTitle"></h2>
+          <p class="view-meta" id="occasionMeta"></p>
+        </div>
+        <div class="toolbar-actions">
+          <label class="date-field">
+            <span>วันที่บันทึก</span>
+            <input type="date" id="occasionDateInput">
+          </label>
+          <input type="search" id="searchInput" placeholder="ค้นหาเลขที่หรือรหัสประจำตัว...">
+        </div>
+      </div>
+      <div class="field-with-save">
+        <label class="field">
+          <span id="occasionNoteLabel">รายละเอียดการเรียนการสอน/กิจกรรมในคาบนี้</span>
+          <textarea id="occasionNoteInput" rows="3" placeholder="เช่น เนื้อหาที่สอน กิจกรรมที่ทำ บริบทของคาบเก็บข้อมูลครั้งนี้..."></textarea>
+        </label>
+        <button type="button" id="btnSaveOccasionNote" class="btn btn-secondary btn-save-note">💾 บันทึก</button>
+        <button type="button" id="btnEditOccasionNote" class="btn btn-ghost btn-save-note hidden">✏️ แก้ไข</button>
+      </div>
+      <div class="field-with-save">
+        <label class="field">
+          <span id="postTeachingNoteLabel">บันทึกหลังการสอน</span>
+          <textarea id="postTeachingNoteInput" rows="3" placeholder="เช่น ข้อสังเกตหลังสอน ปัญหาที่พบ สิ่งที่ควรปรับปรุงครั้งถัดไป..."></textarea>
+        </label>
+        <button type="button" id="btnSavePostTeachingNote" class="btn btn-secondary btn-save-note">💾 บันทึก</button>
+        <button type="button" id="btnEditPostTeachingNote" class="btn btn-ghost btn-save-note hidden">✏️ แก้ไข</button>
+      </div>
+      <p class="hint">แตะที่กล่องนักเรียนเพื่อปรับคะแนนแต่ละหัวข้อและบันทึกพฤติกรรมของครั้งนี้ (เริ่มต้นเต็ม 5 คะแนนต่อข้อ)</p>
+      <div id="studentRows" class="roster-list"></div>
+      <p id="noResults" class="empty-hint hidden">ไม่พบนักเรียนที่ค้นหา</p>
+    </section>
+  </main>
+</div>
+
+<dialog id="modal">
+  <form method="dialog" id="modalForm">
+    <div class="modal-header">
+      <h3 id="modalTitle"></h3>
+      <button type="button" id="modalClose" class="btn-icon" aria-label="ปิด">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </form>
+</dialog>
+
+<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  'use strict';
+
+  const CLASS_ID = 'p1-3';
+  const LOCAL_KEY = 'psychomotorResearch.v1';
+  const OCCASIONS = [1, 2, 3, 4];
+  const LEVELS = [5, 4, 3, 2, 1];
+  const LEVEL_TIERS = { 5: 'ดีเยี่ยม', 4: 'ดีมาก', 3: 'ดี', 2: 'พอใช้', 1: 'ควรปรับปรุง' };
+  const MAX_PER_ITEM = 5;
+  const DEFAULT_LEVEL = 5;
+  const DEFAULT_CRITERIA = [
+    {
+      id: 'participation',
+      label: 'ความตั้งใจและการมีส่วนร่วมในกิจกรรม',
+      descriptions: {
+        5: 'มีความตั้งใจและมีส่วนร่วมในกิจกรรมอย่างเต็มที่ตลอดเวลา',
+        4: 'มีส่วนร่วมในกิจกรรมเกือบทุกครั้ง มีความตั้งใจสม่ำเสมอ',
+        3: 'มีส่วนร่วมในกิจกรรมเป็นบางครั้ง และยังมีสมาธิไม่ต่อเนื่อง',
+        2: 'มีส่วนร่วมน้อย ไม่ค่อยตั้งใจและมักจะสนใจสิ่งอื่นแทน',
+        1: 'ไม่แสดงพฤติกรรมการมีส่วนร่วม หรือขัดขวางกิจกรรม',
+      },
+    },
+    {
+      id: 'discipline',
+      label: 'ความมีระเบียบวินัยและความรับผิดชอบ',
+      descriptions: {
+        5: 'มีระเบียบวินัยและความรับผิดชอบอย่างเต็มที่ตลอดเวลา ปฏิบัติตามกฎระเบียบและทำหน้าที่ที่ได้รับมอบหมายครบถ้วนสม่ำเสมอ',
+        4: 'มีระเบียบวินัยและความรับผิดชอบเกือบทุกครั้ง ปฏิบัติตามกฎระเบียบและทำหน้าที่ที่ได้รับมอบหมายเป็นประจำ',
+        3: 'มีระเบียบวินัยและความรับผิดชอบเป็นบางครั้ง ปฏิบัติตามกฎระเบียบและทำหน้าที่ที่ได้รับมอบหมายแต่ยังไม่สม่ำเสมอ',
+        2: 'มีระเบียบวินัยและความรับผิดชอบน้อย ไม่ค่อยปฏิบัติตามกฎระเบียบหรือทำหน้าที่ที่ได้รับมอบหมายไม่ครบถ้วน',
+        1: 'ไม่แสดงความมีระเบียบวินัยหรือความรับผิดชอบ ไม่ปฏิบัติตามกฎระเบียบหรือขาดความรับผิดชอบต่อหน้าที่ที่ได้รับมอบหมาย',
+      },
+    },
+  ];
+
+  function verdictFor(score, max) {
+    if (max <= 0) return null;
+    const pct = score / max;
+    if (pct >= 0.9) return 'ดีเยี่ยม';
+    if (pct >= 0.8) return 'ดีมาก';
+    if (pct >= 0.6) return 'ดี';
+    if (pct >= 0.5) return 'พอใช้';
+    return 'ควรปรับปรุง';
+  }
+  const FINAL_PASS_SCORE = 7;
+  function isPassingFinal(finalScore) { return finalScore >= FINAL_PASS_SCORE; }
+
+  function occasionTier(score, max) {
+    if (max <= 0) return null;
+    const pct = score / max;
+    if (pct >= 0.8) return 'ดี';
+    if (pct >= 0.5) return 'พอใช้';
+    return 'ควรปรับปรุง';
+  }
+  function occasionTone(tier) {
+    if (tier === 'ดี') return '';
+    if (tier === 'พอใช้') return 'mid';
+    return 'low';
+  }
+
+  const SONGS = [
+    { id: 'nationalAnthem', label: 'เพลงชาติไทย' },
+    { id: 'anthem', label: 'เพลงสรรเสริญพระบารมี' },
+    { id: 'schoolSong', label: 'เพลงสดุดีอัสสัมชัญ' },
+  ];
+  function getSingingResult(studentId, songId) {
+    const v = state.scores[studentId]?.singingExam?.[songId];
+    return v === 'pass' || v === 'fail' ? v : null;
+  }
+  function singingComplete(studentId) {
+    return SONGS.every((s) => getSingingResult(studentId, s.id) !== null);
+  }
+  function singingOverallResult(studentId) {
+    if (!singingComplete(studentId)) return null;
+    return SONGS.every((s) => getSingingResult(studentId, s.id) === 'pass') ? 'pass' : 'fail';
+  }
+  function singingSummaryText(studentId) {
+    const recordedCount = SONGS.filter((s) => getSingingResult(studentId, s.id) !== null).length;
+    if (recordedCount === 0) return 'ยังไม่ประเมิน';
+    if (recordedCount < SONGS.length) return `ประเมินแล้ว ${recordedCount}/${SONGS.length} เพลง`;
+    const passCount = SONGS.filter((s) => getSingingResult(studentId, s.id) === 'pass').length;
+    return passCount === SONGS.length ? 'ผ่านครบทุกเพลง' : `ผ่าน ${passCount}/${SONGS.length} เพลง`;
+  }
+
+  const state = {
+    className: 'ป.1/3',
+    students: [],
+    criteria: [],
+    occasionDates: { 1: '', 2: '', 3: '', 4: '' },
+    occasionNotes: { 1: '', 2: '', 3: '', 4: '' },
+    occasionNoteLocked: { 1: false, 2: false, 3: false, 4: false },
+    postTeachingNotes: { 1: '', 2: '', 3: '', 4: '' },
+    postTeachingNoteLocked: { 1: false, 2: false, 3: false, 4: false },
+    scores: {},
+  };
+  let currentOccasion = 1;
+  let searchQuery = '';
+  let backend = null;
+
+  function uid() {
+    return crypto.randomUUID ? crypto.randomUUID() : `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  }
+
+  // ---------- DOM refs ----------
+  const occasionTabsEl = document.getElementById('occasionTabs');
+  const loadingStateEl = document.getElementById('loadingState');
+  const emptyStateEl = document.getElementById('emptyState');
+  const mainViewEl = document.getElementById('mainView');
+  const occasionTitleEl = document.getElementById('occasionTitle');
+  const occasionMetaEl = document.getElementById('occasionMeta');
+  const occasionDateInput = document.getElementById('occasionDateInput');
+  const occasionNoteInput = document.getElementById('occasionNoteInput');
+  const occasionNoteLabel = document.getElementById('occasionNoteLabel');
+  const postTeachingNoteInput = document.getElementById('postTeachingNoteInput');
+  const postTeachingNoteLabel = document.getElementById('postTeachingNoteLabel');
+  const studentRowsEl = document.getElementById('studentRows');
+  const noResultsEl = document.getElementById('noResults');
+  const searchInput = document.getElementById('searchInput');
+  const syncBadge = document.getElementById('syncBadge');
+
+  const modal = document.getElementById('modal');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalBody = document.getElementById('modalBody');
+  const modalFooter = document.getElementById('modalFooter');
+  const modalForm = document.getElementById('modalForm');
+  const toastEl = document.getElementById('toast');
+
+  // ---------- Helpers ----------
+  function todayStr() { return new Date().toISOString().slice(0, 10); }
+
+  function formatDateTh(dateStr) {
+    if (!dateStr) return '';
+    try {
+      return new Date(dateStr + 'T00:00:00').toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+    } catch { return dateStr; }
+  }
+
+  function getStudent(studentId) { return state.students.find((s) => s.id === studentId) || null; }
+
+  function sortStudents(students) {
+    return [...students].sort((a, b) => {
+      const na = parseFloat(a.number), nb = parseFloat(b.number);
+      if (!Number.isNaN(na) && !Number.isNaN(nb) && na !== nb) return na - nb;
+      return a.number.localeCompare(b.number, 'th') || String(a.code || '').localeCompare(String(b.code || ''), 'th');
+    });
+  }
+
+  function getCriterionScore(rec, critId) {
+    const v = rec[critId];
+    return typeof v === 'number' ? v : DEFAULT_LEVEL;
+  }
+
+  function occasionSummary(studentId, occasionNum) {
+    const rec = state.scores[studentId]?.occasions?.[occasionNum]?.scores || {};
+    let total = 0;
+    state.criteria.forEach((c) => { total += getCriterionScore(rec, c.id); });
+    return { total };
+  }
+
+  function maxTotal() { return state.criteria.length * MAX_PER_ITEM; }
+
+  function finalSummary(studentId) {
+    const totals = OCCASIONS.map((occ) => occasionSummary(studentId, occ).total);
+    const max = maxTotal();
+    const average = totals.reduce((a, b) => a + b, 0) / OCCASIONS.length;
+    const finalScore = max > 0 ? (average / max) * 10 : 0;
+    const passing = isPassingFinal(finalScore);
+    const trend = !passing
+      ? 'ลบคงที่'
+      : totals[totals.length - 1] > totals[0] ? 'ดีขึ้น' : totals[totals.length - 1] < totals[0] ? 'แย่ลง' : 'คงที่';
+    return { totals, finalScore, verdict: verdictFor(finalScore, 10), passing, trend };
+  }
+
+  function showToast(message) {
+    toastEl.textContent = message;
+    toastEl.classList.remove('hidden');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => toastEl.classList.add('hidden'), 2200);
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  // ---------- Backends ----------
+  function createLocalBackend() {
+    function load() {
+      try {
+        const raw = localStorage.getItem(LOCAL_KEY);
+        if (!raw) return null;
+        return JSON.parse(raw);
+      } catch { return null; }
+    }
+    function persist() {
+      localStorage.setItem(LOCAL_KEY, JSON.stringify({
+        className: state.className, students: state.students,
+        criteria: state.criteria, occasionDates: state.occasionDates, occasionNotes: state.occasionNotes,
+        occasionNoteLocked: state.occasionNoteLocked,
+        postTeachingNotes: state.postTeachingNotes, postTeachingNoteLocked: state.postTeachingNoteLocked,
+        scores: state.scores,
+      }));
+    }
+    return {
+      mode: 'local',
+      async init() {
+        const loaded = load();
+        if (loaded) {
+          state.className = loaded.className || state.className;
+          state.students = Array.isArray(loaded.students) ? loaded.students : [];
+          state.criteria = Array.isArray(loaded.criteria) ? loaded.criteria : DEFAULT_CRITERIA;
+          state.occasionDates = loaded.occasionDates || { 1: '', 2: '', 3: '', 4: '' };
+          state.occasionNotes = loaded.occasionNotes || { 1: '', 2: '', 3: '', 4: '' };
+          state.occasionNoteLocked = loaded.occasionNoteLocked || { 1: false, 2: false, 3: false, 4: false };
+          state.postTeachingNotes = loaded.postTeachingNotes || { 1: '', 2: '', 3: '', 4: '' };
+          state.postTeachingNoteLocked = loaded.postTeachingNoteLocked || { 1: false, 2: false, 3: false, 4: false };
+          state.scores = loaded.scores || {};
+        } else {
+          state.criteria = DEFAULT_CRITERIA;
+        }
+        render();
+      },
+      async setCriteria(newList) { state.criteria = newList; persist(); render(); },
+      async setOccasionDate(occasionNum, dateStr) {
+        state.occasionDates = { ...state.occasionDates, [occasionNum]: dateStr };
+        persist();
+      },
+      async setScore(studentId, occasionNum, criterionId, value) {
+        const current = state.scores[studentId] || { occasions: {} };
+        const occasion = current.occasions[occasionNum] || { scores: {} };
+        const newScores = { ...occasion.scores };
+        if (value === null) delete newScores[criterionId]; else newScores[criterionId] = value;
+        state.scores = { ...state.scores, [studentId]: { ...current, occasions: { ...current.occasions, [occasionNum]: { ...occasion, scores: newScores } } } };
+        persist(); render();
+      },
+      async setStudentNote(studentId, occasionNum, text) {
+        const current = state.scores[studentId] || { occasions: {} };
+        const occasion = current.occasions[occasionNum] || { scores: {} };
+        state.scores = { ...state.scores, [studentId]: { ...current, occasions: { ...current.occasions, [occasionNum]: { ...occasion, note: text } } } };
+        persist(); render();
+      },
+      async setOccasionLock(studentId, occasionNum, locked) {
+        const current = state.scores[studentId] || { occasions: {} };
+        const occasion = current.occasions[occasionNum] || { scores: {} };
+        state.scores = { ...state.scores, [studentId]: { ...current, occasions: { ...current.occasions, [occasionNum]: { ...occasion, locked } } } };
+        persist(); render();
+      },
+      async setSingingScore(studentId, songId, value) {
+        const current = state.scores[studentId] || { occasions: {} };
+        const singingExam = { ...(current.singingExam || {}) };
+        if (value === null) delete singingExam[songId]; else singingExam[songId] = value;
+        state.scores = { ...state.scores, [studentId]: { ...current, singingExam } };
+        persist(); render();
+      },
+      async setOccasionNote(occasionNum, text) {
+        state.occasionNotes = { ...state.occasionNotes, [occasionNum]: text };
+        persist();
+      },
+      async setOccasionNoteLock(occasionNum, locked) {
+        state.occasionNoteLocked = { ...state.occasionNoteLocked, [occasionNum]: locked };
+        persist(); render();
+      },
+      async setPostTeachingNote(occasionNum, text) {
+        state.postTeachingNotes = { ...state.postTeachingNotes, [occasionNum]: text };
+        persist();
+      },
+      async setPostTeachingNoteLock(occasionNum, locked) {
+        state.postTeachingNoteLocked = { ...state.postTeachingNoteLocked, [occasionNum]: locked };
+        persist(); render();
+      },
+      async updateStudentInfo(studentId, patch) {
+        state.students = state.students.map((s) => (s.id === studentId ? { ...s, ...patch } : s));
+        persist(); render();
+      },
+      async restoreAll(data) {
+        state.className = data.className || state.className;
+        state.students = Array.isArray(data.students) ? data.students : [];
+        state.criteria = Array.isArray(data.criteria) ? data.criteria : DEFAULT_CRITERIA;
+        state.occasionDates = data.occasionDates || { 1: '', 2: '', 3: '', 4: '' };
+        state.occasionNotes = data.occasionNotes || { 1: '', 2: '', 3: '', 4: '' };
+        state.occasionNoteLocked = data.occasionNoteLocked || { 1: false, 2: false, 3: false, 4: false };
+        state.postTeachingNotes = data.postTeachingNotes || { 1: '', 2: '', 3: '', 4: '' };
+        state.postTeachingNoteLocked = data.postTeachingNoteLocked || { 1: false, 2: false, 3: false, 4: false };
+        state.scores = data.scores || {};
+        persist(); render();
+      },
+    };
+  }
+
+  function createDbBackend(db) {
+    const classDoc = db.collection('classes').doc(CLASS_ID);
+    const configDoc = db.collection('config').doc('research');
+    const scoresCol = db.collection('researchScores');
+    let configSeeded = false;
+
+    classDoc.onSnapshot((snap) => {
+      if (snap.exists) {
+        const d = snap.data();
+        state.className = d.name || state.className;
+        state.students = Array.isArray(d.students) ? d.students : [];
+      }
+      render();
+    }, () => { syncBadge.textContent = 'ออฟไลน์ชั่วคราว'; syncBadge.classList.remove('live'); });
+
+    const CONFIG_DEFAULTS = {
+      criteria: DEFAULT_CRITERIA,
+      occasionDates: { 1: '', 2: '', 3: '', 4: '' },
+      occasionNotes: { 1: '', 2: '', 3: '', 4: '' },
+      occasionNoteLocked: { 1: false, 2: false, 3: false, 4: false },
+      postTeachingNotes: { 1: '', 2: '', 3: '', 4: '' },
+      postTeachingNoteLocked: { 1: false, 2: false, 3: false, 4: false },
+    };
+    function currentConfigDoc(overrides) {
+      return {
+        criteria: state.criteria,
+        occasionDates: state.occasionDates,
+        occasionNotes: state.occasionNotes,
+        occasionNoteLocked: state.occasionNoteLocked,
+        postTeachingNotes: state.postTeachingNotes,
+        postTeachingNoteLocked: state.postTeachingNoteLocked,
+        ...overrides,
+      };
+    }
+
+    configDoc.onSnapshot((snap) => {
+      if (!snap.exists) {
+        if (!configSeeded) {
+          configSeeded = true;
+          configDoc.set(CONFIG_DEFAULTS);
+        }
+        return;
+      }
+      const d = snap.data();
+      state.criteria = Array.isArray(d.criteria) ? d.criteria : DEFAULT_CRITERIA;
+      state.occasionDates = d.occasionDates || CONFIG_DEFAULTS.occasionDates;
+      state.occasionNotes = d.occasionNotes || CONFIG_DEFAULTS.occasionNotes;
+      state.occasionNoteLocked = d.occasionNoteLocked || CONFIG_DEFAULTS.occasionNoteLocked;
+      state.postTeachingNotes = d.postTeachingNotes || CONFIG_DEFAULTS.postTeachingNotes;
+      state.postTeachingNoteLocked = d.postTeachingNoteLocked || CONFIG_DEFAULTS.postTeachingNoteLocked;
+      render();
+    });
+
+    scoresCol.onSnapshot((snap) => {
+      const map = {};
+      snap.docs.forEach((d) => { map[d.id] = d.data(); });
+      state.scores = map;
+      render();
+    });
+
+    return {
+      mode: 'db',
+      async init() {},
+      async setCriteria(newList) {
+        await configDoc.set(currentConfigDoc({ criteria: newList }));
+      },
+      async setOccasionDate(occasionNum, dateStr) {
+        await configDoc.set(currentConfigDoc({ occasionDates: { ...state.occasionDates, [occasionNum]: dateStr } }));
+      },
+      async setScore(studentId, occasionNum, criterionId, value) {
+        const current = state.scores[studentId] || { occasions: {} };
+        const occasion = current.occasions[occasionNum] || { scores: {} };
+        const newScores = { ...occasion.scores };
+        if (value === null) delete newScores[criterionId]; else newScores[criterionId] = value;
+        const newDoc = { ...current, occasions: { ...current.occasions, [occasionNum]: { ...occasion, scores: newScores } } };
+        await scoresCol.doc(studentId).set(newDoc);
+      },
+      async setStudentNote(studentId, occasionNum, text) {
+        const current = state.scores[studentId] || { occasions: {} };
+        const occasion = current.occasions[occasionNum] || { scores: {} };
+        const newDoc = { ...current, occasions: { ...current.occasions, [occasionNum]: { ...occasion, note: text } } };
+        await scoresCol.doc(studentId).set(newDoc);
+      },
+      async setOccasionLock(studentId, occasionNum, locked) {
+        const current = state.scores[studentId] || { occasions: {} };
+        const occasion = current.occasions[occasionNum] || { scores: {} };
+        const newDoc = { ...current, occasions: { ...current.occasions, [occasionNum]: { ...occasion, locked } } };
+        await scoresCol.doc(studentId).set(newDoc);
+      },
+      async setSingingScore(studentId, songId, value) {
+        const current = state.scores[studentId] || { occasions: {} };
+        const singingExam = { ...(current.singingExam || {}) };
+        if (value === null) delete singingExam[songId]; else singingExam[songId] = value;
+        await scoresCol.doc(studentId).set({ ...current, singingExam });
+      },
+      async setOccasionNote(occasionNum, text) {
+        await configDoc.set(currentConfigDoc({ occasionNotes: { ...state.occasionNotes, [occasionNum]: text } }));
+      },
+      async setOccasionNoteLock(occasionNum, locked) {
+        await configDoc.set(currentConfigDoc({ occasionNoteLocked: { ...state.occasionNoteLocked, [occasionNum]: locked } }));
+      },
+      async setPostTeachingNote(occasionNum, text) {
+        await configDoc.set(currentConfigDoc({ postTeachingNotes: { ...state.postTeachingNotes, [occasionNum]: text } }));
+      },
+      async setPostTeachingNoteLock(occasionNum, locked) {
+        await configDoc.set(currentConfigDoc({ postTeachingNoteLocked: { ...state.postTeachingNoteLocked, [occasionNum]: locked } }));
+      },
+      async updateStudentInfo(studentId, patch) {
+        const students = state.students.map((s) => (s.id === studentId ? { ...s, ...patch } : s));
+        await classDoc.update({ students });
+      },
+      async restoreAll(data) {
+        const writes = [];
+        if (Array.isArray(data.students)) {
+          writes.push(classDoc.update({
+            name: data.className || state.className,
+            students: data.students,
+          }));
+        }
+        writes.push(configDoc.set({
+          criteria: Array.isArray(data.criteria) ? data.criteria : DEFAULT_CRITERIA,
+          occasionDates: data.occasionDates || CONFIG_DEFAULTS.occasionDates,
+          occasionNotes: data.occasionNotes || CONFIG_DEFAULTS.occasionNotes,
+          occasionNoteLocked: data.occasionNoteLocked || CONFIG_DEFAULTS.occasionNoteLocked,
+          postTeachingNotes: data.postTeachingNotes || CONFIG_DEFAULTS.postTeachingNotes,
+          postTeachingNoteLocked: data.postTeachingNoteLocked || CONFIG_DEFAULTS.postTeachingNoteLocked,
+        }));
+        const byStudent = data.scores || {};
+        Object.keys(byStudent).forEach((studentId) => {
+          writes.push(scoresCol.doc(studentId).set(byStudent[studentId]));
+        });
+        await Promise.all(writes);
+      },
+    };
+  }
+
+  // ---------- Rendering ----------
+  function render() {
+    renderOccasionTabs();
+    loadingStateEl.classList.add('hidden');
+    if (state.students.length === 0) {
+      emptyStateEl.classList.remove('hidden');
+      mainViewEl.classList.add('hidden');
+      return;
+    }
+    emptyStateEl.classList.add('hidden');
+    mainViewEl.classList.remove('hidden');
+    renderMainView();
+  }
+
+  let occasionTabButtons = null;
+  function renderOccasionTabs() {
+    if (!occasionTabButtons) {
+      occasionTabButtons = OCCASIONS.map((occ) => {
+        const btn = document.createElement('button');
+        btn.className = 'occasion-tab';
+        btn.addEventListener('click', () => {
+          currentOccasion = occ;
+          searchQuery = '';
+          searchInput.value = '';
+          render();
+        });
+        occasionTabsEl.appendChild(btn);
+        return btn;
+      });
+    }
+    OCCASIONS.forEach((occ, i) => {
+      const btn = occasionTabButtons[i];
+      btn.className = 'occasion-tab' + (occ === currentOccasion ? ' active' : '');
+      const lockedCount = state.students.filter((s) => !!state.scores[s.id]?.occasions?.[occ]?.locked).length;
+      const check = state.students.length > 0 && lockedCount === state.students.length ? '<span class="tab-check">✓</span>' : '';
+      btn.innerHTML = `${check}ครั้งที่ ${occ}`;
+    });
+  }
+
+  function renderMainView() {
+    occasionTitleEl.textContent = `ครั้งที่ ${currentOccasion}`;
+    const max = maxTotal();
+    const lockedCount = state.students.filter((s) => !!state.scores[s.id]?.occasions?.[currentOccasion]?.locked).length;
+    occasionMetaEl.textContent = `${state.students.length} คน · บันทึกแล้ว ${lockedCount}/${state.students.length} คน · คะแนนเต็ม ${max} (เริ่มต้นเต็มทุกคน หักเมื่อมีพฤติกรรมไม่พึงประสงค์)`;
+    occasionDateInput.value = state.occasionDates[currentOccasion] || '';
+    occasionNoteLabel.textContent = `รายละเอียดการเรียนการสอน/กิจกรรมในคาบนี้ (ครั้งที่ ${currentOccasion})`;
+    occasionNoteInput.value = state.occasionNotes[currentOccasion] || '';
+    const noteLocked = !!state.occasionNoteLocked[currentOccasion];
+    occasionNoteInput.disabled = noteLocked;
+    document.getElementById('btnSaveOccasionNote').classList.toggle('hidden', noteLocked);
+    document.getElementById('btnEditOccasionNote').classList.toggle('hidden', !noteLocked);
+
+    postTeachingNoteLabel.textContent = `บันทึกหลังการสอน (ครั้งที่ ${currentOccasion})`;
+    postTeachingNoteInput.value = state.postTeachingNotes[currentOccasion] || '';
+    const postNoteLocked = !!state.postTeachingNoteLocked[currentOccasion];
+    postTeachingNoteInput.disabled = postNoteLocked;
+    document.getElementById('btnSavePostTeachingNote').classList.toggle('hidden', postNoteLocked);
+    document.getElementById('btnEditPostTeachingNote').classList.toggle('hidden', !postNoteLocked);
+
+    const q = searchQuery.trim().toLowerCase();
+    const filtered = state.students.filter((s) => !q || s.number.toLowerCase().includes(q) || String(s.code || '').toLowerCase().includes(q));
+    const sorted = sortStudents(filtered);
+
+    studentRowsEl.innerHTML = '';
+    noResultsEl.classList.toggle('hidden', sorted.length !== 0);
+
+    sorted.forEach((student) => {
+      const { total } = occasionSummary(student.id, currentOccasion);
+      const tier = occasionTier(total, max);
+      const pillClass = occasionTone(tier);
+      const occasionRec = state.scores[student.id]?.occasions?.[currentOccasion];
+      const hasNote = !!occasionRec?.note;
+      const isLocked = !!occasionRec?.locked;
+      const hasSinging = SONGS.some((s) => getSingingResult(student.id, s.id) !== null);
+      const row = document.createElement('div');
+      row.className = 'student-row';
+      row.innerHTML = `
+        <span class="card-number">${escapeHtml(student.number)}</span>
+        <span class="row-code">รหัส ${escapeHtml(student.code || '-')}</span>
+        <span class="row-badges">
+          ${isLocked ? '<span title="ล็อกข้อมูลครั้งนี้แล้ว">🔒</span>' : ''}
+          ${hasNote ? '<span title="มีบันทึกพฤติกรรมครั้งนี้">📝</span>' : ''}
+          ${hasSinging ? `<span class="card-song-badge" title="มีคะแนนสอบร้องเพลงแล้ว">🎵</span>` : ''}
+        </span>
+        <span class="row-score ${pillClass}">${total}<span class="row-of">/${max}</span></span>
+        <span class="row-verdict ${pillClass}">${tier}</span>
+      `;
+      row.addEventListener('click', () => openStudentModal(student.id));
+      studentRowsEl.appendChild(row);
+    });
+  }
+
+  // ---------- Modal ----------
+  function openModal(title) {
+    modalTitle.textContent = title;
+    modal.classList.remove('wide');
+    if (!modal.open) modal.showModal();
+  }
+  function closeModal() {
+    modal.close();
+    modalBody.innerHTML = '';
+    modalFooter.innerHTML = '';
+    modalForm.onsubmit = null;
+  }
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  modal.addEventListener('close', () => { modalBody.innerHTML = ''; modalFooter.innerHTML = ''; modalForm.onsubmit = null; });
+
+  // ---------- Student scoring ----------
+  function openStudentModal(studentId) {
+    const student = getStudent(studentId);
+    if (!student) return;
+    openModal(`เลขที่ ${student.number} · รหัส ${student.code || '-'} · ครั้งที่ ${currentOccasion}`);
+    renderStudentModalBody(studentId);
+    renderStudentModalFooter(studentId);
+    modalForm.onsubmit = null;
+  }
+
+  function renderStudentModalFooter(studentId) {
+    const occasionRec = state.scores[studentId]?.occasions?.[currentOccasion] || {};
+    const locked = !!occasionRec.locked;
+    modalFooter.innerHTML = `
+      <button type="button" class="btn btn-ghost" data-edit-info style="margin-right:auto;">✏️ แก้ไขเลขที่-รหัส</button>
+      ${locked
+        ? '<button type="button" class="btn btn-ghost" data-edit-scores>✏️ แก้ไข</button>'
+        : '<button type="button" class="btn btn-primary" data-save>💾 บันทึก</button>'}
+    `;
+    modalFooter.querySelector('[data-edit-info]').addEventListener('click', () => openEditStudentModal(studentId));
+    if (locked) {
+      modalFooter.querySelector('[data-edit-scores]').addEventListener('click', async () => {
+        await backend.setOccasionLock(studentId, currentOccasion, false);
+        if (modal.open) { renderStudentModalBody(studentId); renderStudentModalFooter(studentId); }
+      });
+    } else {
+      modalFooter.querySelector('[data-save]').addEventListener('click', async () => {
+        await backend.setOccasionLock(studentId, currentOccasion, true);
+        closeModal();
+      });
+    }
+  }
+
+  function renderStudentModalBody(studentId) {
+    const occasionRec = state.scores[studentId]?.occasions?.[currentOccasion] || {};
+    const rec = occasionRec.scores || {};
+    const noteVal = occasionRec.note || '';
+    const locked = !!occasionRec.locked;
+    const { total } = occasionSummary(studentId, currentOccasion);
+    const max = maxTotal();
+    const tier = occasionTier(total, max);
+    const rows = state.criteria.map((c) => {
+      const val = getCriterionScore(rec, c.id);
+      const desc = (c.descriptions && c.descriptions[val]) || '';
+      return `
+        <div class="criterion-row-wrap">
+          <div class="criterion-row">
+            <span class="criterion-label">${escapeHtml(c.label)}</span>
+            <div class="level-buttons">
+              ${LEVELS.map((lv) => `<button type="button" class="level-btn ${val === lv ? 'active' : ''}" data-crit="${c.id}" data-value="${lv}" ${locked ? 'disabled' : ''}>${lv}</button>`).join('')}
+            </div>
+          </div>
+          ${desc ? `<p class="criterion-desc">${escapeHtml(String(val))} = ${escapeHtml(desc)}</p>` : ''}
+        </div>
+      `;
+    }).join('');
+    modalBody.innerHTML = `
+      <div class="score-total-banner">
+        คะแนนรวมครั้งที่ ${currentOccasion}: <strong>${total}</strong> / ${max}
+        · <strong>${tier}</strong>
+        ${locked ? ' · 🔒 ล็อกแล้ว' : ''}
+      </div>
+      <p class="hint">${locked ? 'ข้อมูลครั้งนี้ถูกล็อกแล้ว กด "✏️ แก้ไข" ด้านล่างเพื่อแก้ไขคะแนนอีกครั้ง' : 'เริ่มต้นทุกหัวข้อเต็มคะแนน (5) แตะระดับที่ตรงกับพฤติกรรมเพื่อปรับ/หักคะแนน'}</p>
+      ${state.criteria.length === 0
+        ? '<p class="empty-hint">ยังไม่มีหัวข้อประเมิน กดปุ่ม "⚙️ หัวข้อประเมิน" ที่ด้านบนเพื่อเพิ่ม</p>'
+        : rows}
+      <label class="field" style="margin-top:10px;">
+        <span>บันทึกพฤติกรรม (ครั้งที่ ${currentOccasion})</span>
+        <textarea id="f-student-note" rows="3" placeholder="สังเกตพฤติกรรมเพิ่มเติม เหตุการณ์เฉพาะ ฯลฯ" ${locked ? 'disabled' : ''}>${escapeHtml(noteVal)}</textarea>
+      </label>
+      <div class="singing-section">
+        <h4 class="singing-heading">🎵 ผลสอบร้องเพลง</h4>
+        <p class="hint">ผลสอบครั้งเดียว ไม่ผูกกับครั้งที่บันทึกจิตพิสัย และไม่นำไปรวมกับคะแนนจิตพิสัยสุทธิ</p>
+        ${SONGS.map((s) => {
+          const v = getSingingResult(studentId, s.id);
+          return `
+            <div class="singing-field">
+              <span class="singing-field-label">${escapeHtml(s.label)}</span>
+              <div class="singing-buttons">
+                <button type="button" class="singing-btn pass ${v === 'pass' ? 'active' : ''}" data-song="${s.id}" data-value="pass">ผ่าน</button>
+                <button type="button" class="singing-btn fail ${v === 'fail' ? 'active' : ''}" data-song="${s.id}" data-value="fail">ไม่ผ่าน</button>
+              </div>
+            </div>
+          `;
+        }).join('')}
+        <p class="singing-total">สรุป: <strong>${singingSummaryText(studentId)}</strong></p>
+      </div>
+    `;
+    modalBody.querySelectorAll('[data-crit]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const critId = btn.dataset.crit;
+        const value = parseInt(btn.dataset.value, 10);
+        await backend.setScore(studentId, currentOccasion, critId, value);
+        if (modal.open) renderStudentModalBody(studentId);
+      });
+    });
+    const noteInput = modalBody.querySelector('#f-student-note');
+    if (!locked) {
+      noteInput.addEventListener('change', async (e) => {
+        await backend.setStudentNote(studentId, currentOccasion, e.target.value);
+      });
+    }
+    modalBody.querySelectorAll('.singing-btn').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const songId = btn.dataset.song;
+        const value = btn.dataset.value;
+        await backend.setSingingScore(studentId, songId, value);
+        if (modal.open) renderStudentModalBody(studentId);
+      });
+    });
+  }
+
+  function openEditStudentModal(studentId) {
+    const student = getStudent(studentId);
+    if (!student) return;
+    openModal('แก้ไขเลขที่-รหัสประจำตัวนักเรียน');
+    modalBody.innerHTML = `
+      <label class="field"><span>เลขที่</span><input type="text" id="f-number" value="${escapeHtml(student.number)}" required autofocus></label>
+      <label class="field"><span>รหัสประจำตัวนักเรียน</span><input type="text" id="f-code" value="${escapeHtml(student.code || '')}" required></label>
+    `;
+    modalFooter.innerHTML = `<button type="button" class="btn btn-ghost" data-close>ยกเลิก</button><button type="submit" class="btn btn-primary">บันทึก</button>`;
+    modalFooter.querySelector('[data-close]').addEventListener('click', closeModal);
+    modalForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const number = document.getElementById('f-number').value.trim() || student.number;
+      const code = document.getElementById('f-code').value.trim() || student.code;
+      await backend.updateStudentInfo(studentId, { number, code });
+      closeModal();
+      showToast('บันทึกการแก้ไขแล้ว');
+    };
+  }
+
+  // ---------- Criteria settings ----------
+  function openCriteriaModal() {
+    openModal(`ตั้งค่าหัวข้อประเมิน (${MAX_PER_ITEM} คะแนนต่อข้อ)`);
+    renderCriteriaBody();
+    modalFooter.innerHTML = `<button type="button" class="btn btn-ghost" data-close>ปิด</button>`;
+    modalFooter.querySelector('[data-close]').addEventListener('click', closeModal);
+    modalForm.onsubmit = null;
+  }
+
+  function renderCriteriaBody() {
+    modalBody.innerHTML = `
+      <p class="hint">แก้ไขชื่อหัวข้อและคำอธิบายเกณฑ์แต่ละระดับ (${LEVELS[0]}=${LEVEL_TIERS[LEVELS[0]]} ... ${LEVELS[LEVELS.length - 1]}=${LEVEL_TIERS[LEVELS[LEVELS.length - 1]]}) ให้ตรงกับเครื่องมือวิจัยของคุณ ทุกหัวข้อเริ่มต้นที่คะแนนเต็ม (${DEFAULT_LEVEL}) เสมอ แนะนำให้ตั้งค่าให้ครบก่อนเริ่มบันทึกครั้งที่ 1 เพื่อให้ใช้เกณฑ์เดียวกันทั้ง 4 ครั้ง</p>
+      <div id="criteriaList"></div>
+      <button type="button" id="btnAddCriterion" class="btn btn-secondary">+ เพิ่มหัวข้อ</button>
+    `;
+    const listEl = modalBody.querySelector('#criteriaList');
+    state.criteria.forEach((c) => {
+      const card = document.createElement('div');
+      card.className = 'criteria-card';
+      card.innerHTML = `
+        <div class="criteria-list-row">
+          <input type="text" class="criteria-input criteria-title-input" value="${escapeHtml(c.label)}">
+          <button type="button" class="btn-icon" title="ลบหัวข้อนี้">🗑️</button>
+        </div>
+        ${LEVELS.map((lv) => `
+          <label class="criteria-level-row">
+            <span>${lv} (${LEVEL_TIERS[lv]})</span>
+            <input type="text" class="criteria-input" data-level="${lv}" value="${escapeHtml((c.descriptions && c.descriptions[lv]) || '')}" placeholder="คำอธิบายเกณฑ์ระดับ ${lv}">
+          </label>
+        `).join('')}
+      `;
+      card.querySelector('.criteria-title-input').addEventListener('change', async (e) => {
+        const newLabel = e.target.value.trim() || c.label;
+        await backend.setCriteria(state.criteria.map((x) => (x.id === c.id ? { ...x, label: newLabel } : x)));
+      });
+      card.querySelector('[title="ลบหัวข้อนี้"]').addEventListener('click', async () => {
+        if (!confirm(`ยืนยันลบหัวข้อ "${c.label}"? คะแนนที่เคยบันทึกในหัวข้อนี้จะไม่แสดงอีกต่อไป`)) return;
+        await backend.setCriteria(state.criteria.filter((x) => x.id !== c.id));
+        renderCriteriaBody();
+      });
+      card.querySelectorAll('[data-level]').forEach((input) => {
+        input.addEventListener('change', async (e) => {
+          const lv = parseInt(e.target.dataset.level, 10);
+          const newDescriptions = { ...(c.descriptions || {}), [lv]: e.target.value.trim() };
+          await backend.setCriteria(state.criteria.map((x) => (x.id === c.id ? { ...x, descriptions: newDescriptions } : x)));
+        });
+      });
+      listEl.appendChild(card);
+    });
+    modalBody.querySelector('#btnAddCriterion').addEventListener('click', async () => {
+      await backend.setCriteria([...state.criteria, { id: uid(), label: 'หัวข้อใหม่', descriptions: {} }]);
+      renderCriteriaBody();
+    });
+  }
+
+  function openSummaryModal() {
+    openModal(`สรุปผลรวม 4 ครั้ง · คะแนนจิตพิสัยสุทธิ (เต็ม 10)`);
+    modal.classList.add('wide');
+    const passCount = sortStudents(state.students).filter((s) => finalSummary(s.id).passing).length;
+    const rows = sortStudents(state.students).map((s) => {
+      const { totals, finalScore, verdict, passing, trend } = finalSummary(s.id);
+      return `
+        <tr>
+          <td>${escapeHtml(s.number)}</td>
+          <td>${escapeHtml(s.code || '-')}</td>
+          ${totals.map((t) => `<td class="num">${t}</td>`).join('')}
+          <td class="num"><strong>${finalScore.toFixed(1)}</strong></td>
+          <td>${verdict}</td>
+          <td class="${passing ? 'pass' : 'fail'}">${passing ? 'ผ่าน' : 'ไม่ผ่าน'}</td>
+          <td>${trend}</td>
+        </tr>
+      `;
+    }).join('');
+    modalBody.innerHTML = `
+      <p class="hint">
+        คะแนนจิตพิสัยสุทธิคำนวณจากค่าเฉลี่ยของทั้ง 4 ครั้ง (แต่ละครั้งเต็ม ${maxTotal()}) แล้วปรับสัดส่วนให้เต็ม 10 คะแนนตามหลักสูตร ·
+        ต้องได้ไม่ต่ำกว่า ${FINAL_PASS_SCORE} คะแนนจึงจะถือว่าผ่านเกณฑ์ (ต่ำกว่า ${FINAL_PASS_SCORE} = ไม่ผ่าน) ·
+        ผ่านเกณฑ์ ${passCount}/${state.students.length} คน · แนวโน้มเทียบครั้งที่ 4 กับครั้งที่ 1 ·
+        ดูผลสอบร้องเพลงแยกต่างหากได้ที่ปุ่ม "🎵 สรุปผลร้องเพลง"
+      </p>
+      <div class="table-scroll">
+        <table class="summary-table">
+          <thead>
+            <tr>
+              <th>เลขที่</th><th>รหัสประจำตัวนักเรียน</th>
+              ${OCCASIONS.map((occ) => `<th>ครั้งที่ ${occ}</th>`).join('')}
+              <th>คะแนนสุทธิ /10</th><th>ระดับ</th><th>ผล</th><th>แนวโน้ม</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `;
+    modalFooter.innerHTML = `<button type="button" class="btn btn-ghost" data-close>ปิด</button>`;
+    modalFooter.querySelector('[data-close]').addEventListener('click', closeModal);
+    modalForm.onsubmit = null;
+  }
+
+  function openSingingSummaryModal() {
+    openModal('สรุปผลสอบร้องเพลง');
+    modal.classList.add('wide');
+    const rows = sortStudents(state.students).map((s) => {
+      const overall = singingOverallResult(s.id);
+      const overallCls = overall === null ? '' : overall === 'pass' ? 'pass' : 'fail';
+      return `
+        <tr>
+          <td>${escapeHtml(s.number)}</td>
+          <td>${escapeHtml(s.code || '-')}</td>
+          ${SONGS.map((song) => {
+            const v = getSingingResult(s.id, song.id);
+            const cls = v === null ? '' : v === 'pass' ? 'pass' : 'fail';
+            return `<td class="${cls}">${v === null ? '-' : v === 'pass' ? 'ผ่าน' : 'ไม่ผ่าน'}</td>`;
+          }).join('')}
+          <td class="${overallCls}"><strong>${overall === null ? '-' : overall === 'pass' ? 'ผ่าน' : 'ไม่ผ่าน'}</strong></td>
+        </tr>
+      `;
+    }).join('');
+    modalBody.innerHTML = `
+      <p class="hint">
+        ผลสอบร้องเพลงเป็นผลสอบครั้งเดียว แยกต่างหากจากคะแนนจิตพิสัยสุทธิโดยสิ้นเชิง ·
+        คอลัมน์ "ผลรวม" ขึ้นผ่าน ก็ต่อเมื่อประเมินครบทั้ง 2 เพลง และผ่านทั้งคู่
+      </p>
+      <div class="table-scroll">
+        <table class="summary-table">
+          <thead>
+            <tr>
+              <th>เลขที่</th><th>รหัสประจำตัวนักเรียน</th>
+              ${SONGS.map((song) => `<th>${escapeHtml(song.label)}</th>`).join('')}
+              <th>ผลรวม</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `;
+    modalFooter.innerHTML = `<button type="button" class="btn btn-ghost" data-close>ปิด</button>`;
+    modalFooter.querySelector('[data-close]').addEventListener('click', closeModal);
+    modalForm.onsubmit = null;
+  }
+
+  // ---------- File save (downloads capability, fallback to blob link) ----------
+  let downloadsApi = null;
+  async function saveFile(filename, content, mime) {
+    if (downloadsApi) {
+      try {
+        await downloadsApi.save({ filename, data: content });
+        return;
+      } catch (err) {
+        if (err && err.code === 'declined') return;
+      }
+    }
+    const blob = content instanceof Blob ? content : new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  async function exportBackup() {
+    const data = {
+      className: state.className, students: state.students,
+      criteria: state.criteria, occasionDates: state.occasionDates, occasionNotes: state.occasionNotes,
+      occasionNoteLocked: state.occasionNoteLocked,
+      postTeachingNotes: state.postTeachingNotes, postTeachingNoteLocked: state.postTeachingNoteLocked,
+      scores: state.scores,
+    };
+    await saveFile(`วิจัยจิตพิสัย-ป1-3-backup-${todayStr()}.json`, JSON.stringify(data, null, 2), 'application/json');
+  }
+
+  function importBackup(file) {
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const parsed = JSON.parse(String(reader.result));
+        if (!Array.isArray(parsed.students)) throw new Error('invalid');
+        if (!confirm('การกู้คืนจะแทนที่ข้อมูลปัจจุบันทั้งหมด (รายชื่อ หัวข้อประเมิน และคะแนนทุกครั้ง) ยืนยันหรือไม่?')) return;
+        await backend.restoreAll(parsed);
+        showToast('กู้คืนข้อมูลสำเร็จ');
+      } catch { alert('ไฟล์ไม่ถูกต้อง ไม่สามารถกู้คืนข้อมูลได้'); }
+    };
+    reader.readAsText(file);
+  }
+
+  async function exportCsv() {
+    const header = ['เลขที่', 'รหัสประจำตัวนักเรียน'];
+    OCCASIONS.forEach((occ) => {
+      state.criteria.forEach((c) => header.push(`ครั้งที่${occ}_${c.label}`));
+      header.push(`ครั้งที่${occ}_รวม`);
+      header.push(`ครั้งที่${occ}_บันทึกพฤติกรรม`);
+    });
+    header.push('คะแนนสุทธิ_เต็ม10', 'ระดับสุทธิ', 'ผลสุทธิ', 'แนวโน้ม');
+    SONGS.forEach((song) => header.push(`ร้องเพลง_${song.label}`));
+    header.push('ผลรวมร้องเพลง');
+    const rows = [header];
+    sortStudents(state.students).forEach((s) => {
+      const row = [s.number, s.code || ''];
+      OCCASIONS.forEach((occ) => {
+        const occasionRec = state.scores[s.id]?.occasions?.[occ] || {};
+        const rec = occasionRec.scores || {};
+        let total = 0;
+        state.criteria.forEach((c) => {
+          const v = getCriterionScore(rec, c.id);
+          row.push(String(v));
+          total += v;
+        });
+        row.push(String(total));
+        row.push(occasionRec.note || '');
+      });
+      const { finalScore, verdict, passing, trend } = finalSummary(s.id);
+      row.push(finalScore.toFixed(1), verdict, passing ? 'ผ่าน' : 'ไม่ผ่าน', trend);
+      SONGS.forEach((song) => {
+        const v = getSingingResult(s.id, song.id);
+        row.push(v === null ? '' : v === 'pass' ? 'ผ่าน' : 'ไม่ผ่าน');
+      });
+      const overall = singingOverallResult(s.id);
+      row.push(overall === null ? '' : overall === 'pass' ? 'ผ่าน' : 'ไม่ผ่าน');
+      rows.push(row);
+    });
+    const csv = rows.map((r) => r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+    await saveFile(`ป1-3-คะแนนจิตพิสัย-วิจัย-${todayStr()}.csv`, '﻿' + csv, 'text/csv;charset=utf-8;');
+  }
+
+  // ---------- Wire up global buttons ----------
+  document.getElementById('btnCriteria').addEventListener('click', openCriteriaModal);
+  document.getElementById('btnSummary').addEventListener('click', openSummaryModal);
+  document.getElementById('btnSingingSummary').addEventListener('click', openSingingSummaryModal);
+  document.getElementById('btnExportCsv').addEventListener('click', exportCsv);
+  document.getElementById('btnExport').addEventListener('click', exportBackup);
+  document.getElementById('importFile').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) importBackup(file);
+    e.target.value = '';
+  });
+  searchInput.addEventListener('input', (e) => { searchQuery = e.target.value; renderMainView(); });
+  occasionDateInput.addEventListener('change', async (e) => {
+    await backend.setOccasionDate(currentOccasion, e.target.value);
+  });
+  occasionNoteInput.addEventListener('change', async (e) => {
+    await backend.setOccasionNote(currentOccasion, e.target.value);
+  });
+  postTeachingNoteInput.addEventListener('change', async (e) => {
+    await backend.setPostTeachingNote(currentOccasion, e.target.value);
+  });
+  document.getElementById('btnSaveOccasionNote').addEventListener('click', async () => {
+    await backend.setOccasionNote(currentOccasion, occasionNoteInput.value);
+    await backend.setOccasionNoteLock(currentOccasion, true);
+    showToast('บันทึกและล็อกรายละเอียดการสอนแล้ว');
+  });
+  document.getElementById('btnEditOccasionNote').addEventListener('click', async () => {
+    await backend.setOccasionNoteLock(currentOccasion, false);
+  });
+  document.getElementById('btnSavePostTeachingNote').addEventListener('click', async () => {
+    await backend.setPostTeachingNote(currentOccasion, postTeachingNoteInput.value);
+    await backend.setPostTeachingNoteLock(currentOccasion, true);
+    showToast('บันทึกและล็อกข้อมูลหลังการสอนแล้ว');
+  });
+  document.getElementById('btnEditPostTeachingNote').addEventListener('click', async () => {
+    await backend.setPostTeachingNoteLock(currentOccasion, false);
+  });
+
+  // ---------- Boot ----------
+  (async () => {
+    let db = null;
+    try { db = window.claude ? await window.claude.use('db') : null; } catch { db = null; }
+    if (db) {
+      backend = createDbBackend(db);
+      syncBadge.textContent = '🟢 ซิงค์อัตโนมัติ';
+      syncBadge.classList.add('live');
+      render();
+    } else {
+      backend = createLocalBackend();
+      syncBadge.textContent = '💾 บันทึกในเครื่องนี้เท่านั้น';
+      await backend.init();
+    }
+    try {
+      if (window.claude) downloadsApi = await window.claude.use('downloads');
+    } catch { downloadsApi = null; }
+  })();
+})();
+</script>
