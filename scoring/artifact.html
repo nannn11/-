@@ -409,7 +409,6 @@
   .summary-table td.num { font-variant-numeric: tabular-nums; text-align: center; }
   .summary-table td.pass { color: var(--positive); font-weight: 600; }
   .summary-table td.fail { color: var(--negative); font-weight: 600; }
-  .summary-table th.sep, .summary-table td.sep { border-left: 2px dashed var(--line); }
 
   @media (max-width: 640px) {
     .view-toolbar { flex-direction: column; align-items: stretch; }
@@ -431,6 +430,7 @@
       <span id="syncBadge" class="sync-badge">กำลังเชื่อมต่อ…</span>
       <button id="btnCriteria" class="btn btn-secondary" title="ตั้งค่าหัวข้อประเมิน">⚙️ หัวข้อประเมิน</button>
       <button id="btnSummary" class="btn btn-secondary" title="สรุปผลรวม 4 ครั้ง และคะแนนจิตพิสัยสุทธิ (เต็ม 10)">📊 สรุปผลรวม</button>
+      <button id="btnSingingSummary" class="btn btn-secondary" title="สรุปผลสอบร้องเพลง แยกจากคะแนนจิตพิสัย">🎵 สรุปผลร้องเพลง</button>
       <button id="btnExportCsv" class="btn btn-ghost" title="ส่งออกข้อมูลทั้ง 4 ครั้งเป็น CSV สำหรับวิเคราะห์">⬇️ CSV</button>
       <button id="btnExport" class="btn btn-ghost" title="สำรองข้อมูลทั้งหมดเป็นไฟล์ JSON">💾 สำรองข้อมูล</button>
       <label class="btn btn-ghost" title="กู้คืนข้อมูลจากไฟล์ JSON">
@@ -1125,16 +1125,6 @@
           <td>${verdict}</td>
           <td class="${passing ? 'pass' : 'fail'}">${passing ? 'ผ่าน' : 'ไม่ผ่าน'}</td>
           <td>${trend}</td>
-          ${SONGS.map((song, i) => {
-            const v = getSingingResult(s.id, song.id);
-            const cls = v === null ? '' : v === 'pass' ? 'pass' : 'fail';
-            return `<td class="${cls}${i === 0 ? ' sep' : ''}">${v === null ? '-' : v === 'pass' ? 'ผ่าน' : 'ไม่ผ่าน'}</td>`;
-          }).join('')}
-          ${(() => {
-            const overall = singingOverallResult(s.id);
-            const cls = overall === null ? '' : overall === 'pass' ? 'pass' : 'fail';
-            return `<td class="${cls}">${overall === null ? '-' : overall === 'pass' ? 'ผ่าน' : 'ไม่ผ่าน'}</td>`;
-          })()}
         </tr>
       `;
     }).join('');
@@ -1143,7 +1133,7 @@
         คะแนนจิตพิสัยสุทธิคำนวณจากค่าเฉลี่ยของทั้ง 4 ครั้ง (แต่ละครั้งเต็ม ${maxTotal()}) แล้วปรับสัดส่วนให้เต็ม 10 คะแนนตามหลักสูตร ·
         ต้องได้ไม่ต่ำกว่า ${FINAL_PASS_SCORE} คะแนนจึงจะถือว่าผ่านเกณฑ์ (ต่ำกว่า ${FINAL_PASS_SCORE} = ไม่ผ่าน) ·
         ผ่านเกณฑ์ ${passCount}/${state.students.length} คน · แนวโน้มเทียบครั้งที่ 4 กับครั้งที่ 1 ·
-        ผลสอบร้องเพลง (คอลัมน์ขวาสุด) เป็นผลแยกต่างหาก ไม่รวมกับคะแนนจิตพิสัยสุทธิ
+        ดูผลสอบร้องเพลงแยกต่างหากได้ที่ปุ่ม "🎵 สรุปผลร้องเพลง"
       </p>
       <div class="table-scroll">
         <table class="summary-table">
@@ -1152,8 +1142,48 @@
               <th>เลขที่</th><th>รหัสประจำตัวนักเรียน</th>
               ${OCCASIONS.map((occ) => `<th>ครั้งที่ ${occ}</th>`).join('')}
               <th>คะแนนสุทธิ /10</th><th>ระดับ</th><th>ผล</th><th>แนวโน้ม</th>
-              ${SONGS.map((song, i) => `<th${i === 0 ? ' class="sep"' : ''}>${escapeHtml(song.label)}</th>`).join('')}
-              <th>ผลรวมร้องเพลง</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `;
+    modalFooter.innerHTML = `<button type="button" class="btn btn-ghost" data-close>ปิด</button>`;
+    modalFooter.querySelector('[data-close]').addEventListener('click', closeModal);
+    modalForm.onsubmit = null;
+  }
+
+  function openSingingSummaryModal() {
+    openModal('สรุปผลสอบร้องเพลง');
+    modal.classList.add('wide');
+    const rows = sortStudents(state.students).map((s) => {
+      const overall = singingOverallResult(s.id);
+      const overallCls = overall === null ? '' : overall === 'pass' ? 'pass' : 'fail';
+      return `
+        <tr>
+          <td>${escapeHtml(s.number)}</td>
+          <td>${escapeHtml(s.code || '-')}</td>
+          ${SONGS.map((song) => {
+            const v = getSingingResult(s.id, song.id);
+            const cls = v === null ? '' : v === 'pass' ? 'pass' : 'fail';
+            return `<td class="${cls}">${v === null ? '-' : v === 'pass' ? 'ผ่าน' : 'ไม่ผ่าน'}</td>`;
+          }).join('')}
+          <td class="${overallCls}"><strong>${overall === null ? '-' : overall === 'pass' ? 'ผ่าน' : 'ไม่ผ่าน'}</strong></td>
+        </tr>
+      `;
+    }).join('');
+    modalBody.innerHTML = `
+      <p class="hint">
+        ผลสอบร้องเพลงเป็นผลสอบครั้งเดียว แยกต่างหากจากคะแนนจิตพิสัยสุทธิโดยสิ้นเชิง ·
+        คอลัมน์ "ผลรวม" ขึ้นผ่าน ก็ต่อเมื่อประเมินครบทั้ง 2 เพลง และผ่านทั้งคู่
+      </p>
+      <div class="table-scroll">
+        <table class="summary-table">
+          <thead>
+            <tr>
+              <th>เลขที่</th><th>รหัสประจำตัวนักเรียน</th>
+              ${SONGS.map((song) => `<th>${escapeHtml(song.label)}</th>`).join('')}
+              <th>ผลรวม</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
@@ -1249,6 +1279,7 @@
   // ---------- Wire up global buttons ----------
   document.getElementById('btnCriteria').addEventListener('click', openCriteriaModal);
   document.getElementById('btnSummary').addEventListener('click', openSummaryModal);
+  document.getElementById('btnSingingSummary').addEventListener('click', openSingingSummaryModal);
   document.getElementById('btnExportCsv').addEventListener('click', exportCsv);
   document.getElementById('btnExport').addEventListener('click', exportBackup);
   document.getElementById('importFile').addEventListener('change', (e) => {
