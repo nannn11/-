@@ -584,7 +584,6 @@
 
   const state = {
     className: 'ป.1/3',
-    teacher: null,
     students: [],
     criteria: [],
     occasionDates: { 1: '', 2: '', 3: '', 4: '' },
@@ -694,7 +693,7 @@
     }
     function persist() {
       localStorage.setItem(LOCAL_KEY, JSON.stringify({
-        className: state.className, teacher: state.teacher, students: state.students,
+        className: state.className, students: state.students,
         criteria: state.criteria, occasionDates: state.occasionDates, occasionNotes: state.occasionNotes,
         occasionNoteLocked: state.occasionNoteLocked,
         postTeachingNotes: state.postTeachingNotes, postTeachingNoteLocked: state.postTeachingNoteLocked,
@@ -707,7 +706,6 @@
         const loaded = load();
         if (loaded) {
           state.className = loaded.className || state.className;
-          state.teacher = loaded.teacher || null;
           state.students = Array.isArray(loaded.students) ? loaded.students : [];
           state.criteria = Array.isArray(loaded.criteria) ? loaded.criteria : DEFAULT_CRITERIA;
           state.occasionDates = loaded.occasionDates || { 1: '', 2: '', 3: '', 4: '' };
@@ -775,7 +773,6 @@
       },
       async restoreAll(data) {
         state.className = data.className || state.className;
-        state.teacher = data.teacher || null;
         state.students = Array.isArray(data.students) ? data.students : [];
         state.criteria = Array.isArray(data.criteria) ? data.criteria : DEFAULT_CRITERIA;
         state.occasionDates = data.occasionDates || { 1: '', 2: '', 3: '', 4: '' };
@@ -799,7 +796,6 @@
       if (snap.exists) {
         const d = snap.data();
         state.className = d.name || state.className;
-        state.teacher = d.teacher || null;
         state.students = Array.isArray(d.students) ? d.students : [];
       }
       render();
@@ -906,7 +902,6 @@
         if (Array.isArray(data.students)) {
           writes.push(classDoc.update({
             name: data.className || state.className,
-            teacher: data.teacher || null,
             students: data.students,
           }));
         }
@@ -970,8 +965,7 @@
     occasionTitleEl.textContent = `ครั้งที่ ${currentOccasion}`;
     const max = maxTotal();
     const lockedCount = state.students.filter((s) => !!state.scores[s.id]?.occasions?.[currentOccasion]?.locked).length;
-    const teacherText = state.teacher ? ` · ครูประจำชั้น ${state.teacher}` : '';
-    occasionMetaEl.textContent = `${state.students.length} คน · บันทึกแล้ว ${lockedCount}/${state.students.length} คน · คะแนนเต็ม ${max} (เริ่มต้นเต็มทุกคน หักเมื่อมีพฤติกรรมไม่พึงประสงค์)${teacherText}`;
+    occasionMetaEl.textContent = `${state.students.length} คน · บันทึกแล้ว ${lockedCount}/${state.students.length} คน · คะแนนเต็ม ${max} (เริ่มต้นเต็มทุกคน หักเมื่อมีพฤติกรรมไม่พึงประสงค์)`;
     occasionDateInput.value = state.occasionDates[currentOccasion] || '';
     occasionNoteLabel.textContent = `รายละเอียดการเรียนการสอน/กิจกรรมในคาบนี้ (ครั้งที่ ${currentOccasion})`;
     occasionNoteInput.value = state.occasionNotes[currentOccasion] || '';
@@ -1328,7 +1322,7 @@
 
   async function exportBackup() {
     const data = {
-      className: state.className, teacher: state.teacher, students: state.students,
+      className: state.className, students: state.students,
       criteria: state.criteria, occasionDates: state.occasionDates, occasionNotes: state.occasionNotes,
       occasionNoteLocked: state.occasionNoteLocked,
       postTeachingNotes: state.postTeachingNotes, postTeachingNoteLocked: state.postTeachingNoteLocked,
