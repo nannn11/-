@@ -381,6 +381,13 @@
   }
   .criteria-level-row span { flex-shrink: 0; width: 78px; }
 
+  .singing-section { margin-top: 18px; padding-top: 14px; border-top: 2px dashed var(--line); }
+  .singing-heading { margin: 0 0 4px; font-size: 0.98rem; }
+  .singing-field { margin-bottom: 10px; }
+  .singing-input { max-width: 120px; }
+  .singing-total { font-size: 0.88rem; color: var(--ink); margin: 4px 0 0; }
+  .card-song-badge { color: var(--gold); }
+
   .table-scroll { overflow-x: auto; }
   .summary-table { width: 100%; border-collapse: collapse; min-width: 640px; }
   .summary-table th, .summary-table td {
@@ -391,6 +398,7 @@
   .summary-table td.num { font-variant-numeric: tabular-nums; text-align: center; }
   .summary-table td.pass { color: var(--positive); font-weight: 600; }
   .summary-table td.fail { color: var(--negative); font-weight: 600; }
+  .summary-table th.sep, .summary-table td.sep { border-left: 2px dashed var(--line); }
 
   @media (max-width: 640px) {
     .view-toolbar { flex-direction: column; align-items: stretch; }
@@ -519,6 +527,25 @@
     if (tier === 'ดีเยี่ยม' || tier === 'ดีมาก') return '';
     if (tier === 'ดี' || tier === 'พอใช้') return 'mid';
     return 'low';
+  }
+
+  const SONG_MAX = 10;
+  const SONGS = [
+    { id: 'anthem', label: 'เพลงสรรเสริญพระบารมี' },
+    { id: 'schoolSong', label: 'เพลงสดุดีอัสสัมชัญ' },
+  ];
+  function getSingingScore(studentId, songId) {
+    const v = state.scores[studentId]?.singingExam?.[songId];
+    return typeof v === 'number' ? v : null;
+  }
+  function singingTotal(studentId) {
+    return SONGS.reduce((sum, s) => {
+      const v = getSingingScore(studentId, s.id);
+      return sum + (v === null ? 0 : v);
+    }, 0);
+  }
+  function singingComplete(studentId) {
+    return SONGS.every((s) => getSingingScore(studentId, s.id) !== null);
   }
 
   const state = {
@@ -660,13 +687,20 @@
         const occasion = current.occasions[occasionNum] || { scores: {} };
         const newScores = { ...occasion.scores };
         if (value === null) delete newScores[criterionId]; else newScores[criterionId] = value;
-        state.scores = { ...state.scores, [studentId]: { occasions: { ...current.occasions, [occasionNum]: { ...occasion, scores: newScores } } } };
+        state.scores = { ...state.scores, [studentId]: { ...current, occasions: { ...current.occasions, [occasionNum]: { ...occasion, scores: newScores } } } };
         persist(); render();
       },
       async setStudentNote(studentId, occasionNum, text) {
         const current = state.scores[studentId] || { occasions: {} };
         const occasion = current.occasions[occasionNum] || { scores: {} };
-        state.scores = { ...state.scores, [studentId]: { occasions: { ...current.occasions, [occasionNum]: { ...occasion, note: text } } } };
+        state.scores = { ...state.scores, [studentId]: { ...current, occasions: { ...current.occasions, [occasionNum]: { ...occasion, note: text } } } };
+        persist(); render();
+      },
+      async setSingingScore(studentId, songId, value) {
+        const current = state.scores[studentId] || { occasions: {} };
+        const singingExam = { ...(current.singingExam || {}) };
+        if (value === null) delete singingExam[songId]; else singingExam[songId] = value;
+        state.scores = { ...state.scores, [studentId]: { ...current, singingExam } };
         persist(); render();
       },
       async setOccasionNote(occasionNum, text) {
@@ -747,14 +781,20 @@
         const occasion = current.occasions[occasionNum] || { scores: {} };
         const newScores = { ...occasion.scores };
         if (value === null) delete newScores[criterionId]; else newScores[criterionId] = value;
-        const newDoc = { occasions: { ...current.occasions, [occasionNum]: { ...occasion, scores: newScores } } };
+        const newDoc = { ...current, occasions: { ...current.occasions, [occasionNum]: { ...occasion, scores: newScores } } };
         await scoresCol.doc(studentId).set(newDoc);
       },
       async setStudentNote(studentId, occasionNum, text) {
         const current = state.scores[studentId] || { occasions: {} };
         const occasion = current.occasions[occasionNum] || { scores: {} };
-        const newDoc = { occasions: { ...current.occasions, [occasionNum]: { ...occasion, note: text } } };
+        const newDoc = { ...current, occasions: { ...current.occasions, [occasionNum]: { ...occasion, note: text } } };
         await scoresCol.doc(studentId).set(newDoc);
+      },
+      async setSingingScore(studentId, songId, value) {
+        const current = state.scores[studentId] || { occasions: {} };
+        const singingExam = { ...(current.singingExam || {}) };
+        if (value === null) delete singingExam[songId]; else singingExam[songId] = value;
+        await scoresCol.doc(studentId).set({ ...current, singingExam });
       },
       async setOccasionNote(occasionNum, text) {
         const newNotes = { ...state.occasionNotes, [occasionNum]: text };
@@ -851,12 +891,16 @@
       const pillClass = verdictTone(tier);
       const passing = isPassing(total, max);
       const hasNote = !!(state.scores[student.id]?.occasions?.[currentOccasion]?.note);
+      const hasSinging = getSingingScore(student.id, SONGS[0].id) !== null || getSingingScore(student.id, SONGS[1].id) !== null;
       const card = document.createElement('div');
       card.className = 'student-card';
       card.innerHTML = `
         <div class="card-top">
           <span class="card-number">${escapeHtml(student.number)}</span>
-          ${hasNote ? '<span title="มีบันทึกพฤติกรรมครั้งนี้">📝</span>' : ''}
+          <span>
+            ${hasNote ? '<span title="มีบันทึกพฤติกรรมครั้งนี้">📝</span>' : ''}
+            ${hasSinging ? `<span class="card-song-badge" title="มีคะแนนสอบร้องเพลงแล้ว">🎵</span>` : ''}
+          </span>
         </div>
         <div class="card-name">รหัส ${escapeHtml(student.code || '-')}</div>
         <div class="card-score-row">
@@ -937,6 +981,20 @@
         <span>บันทึกพฤติกรรม (ครั้งที่ ${currentOccasion})</span>
         <textarea id="f-student-note" rows="3" placeholder="สังเกตพฤติกรรมเพิ่มเติม เหตุการณ์เฉพาะ ฯลฯ">${escapeHtml(noteVal)}</textarea>
       </label>
+      <div class="singing-section">
+        <h4 class="singing-heading">🎵 คะแนนสอบร้องเพลง</h4>
+        <p class="hint">คะแนนสอบครั้งเดียว ไม่ผูกกับครั้งที่บันทึกจิตพิสัย และไม่นำไปรวมกับคะแนนจิตพิสัยสุทธิ</p>
+        ${SONGS.map((s) => {
+          const v = getSingingScore(studentId, s.id);
+          return `
+            <label class="field singing-field">
+              <span>${escapeHtml(s.label)} (เต็ม ${SONG_MAX})</span>
+              <input type="number" class="singing-input" data-song="${s.id}" min="0" max="${SONG_MAX}" step="0.5" value="${v === null ? '' : v}" placeholder="ยังไม่สอบ">
+            </label>
+          `;
+        }).join('')}
+        <p class="singing-total">รวมคะแนนร้องเพลง: <strong>${singingTotal(studentId)}</strong> / ${SONG_MAX * SONGS.length}</p>
+      </div>
     `;
     modalBody.querySelectorAll('[data-crit]').forEach((btn) => {
       btn.addEventListener('click', async () => {
@@ -948,6 +1006,17 @@
     });
     modalBody.querySelector('#f-student-note').addEventListener('change', async (e) => {
       await backend.setStudentNote(studentId, currentOccasion, e.target.value);
+    });
+    modalBody.querySelectorAll('.singing-input').forEach((input) => {
+      input.addEventListener('change', async (e) => {
+        const songId = e.target.dataset.song;
+        const raw = e.target.value.trim();
+        let value = raw === '' ? null : parseFloat(raw);
+        if (value !== null && (Number.isNaN(value) || value < 0)) value = 0;
+        if (value !== null && value > SONG_MAX) value = SONG_MAX;
+        await backend.setSingingScore(studentId, songId, value);
+        if (modal.open) renderStudentModalBody(studentId);
+      });
     });
   }
 
@@ -1041,6 +1110,11 @@
           <td>${verdict}</td>
           <td class="${passing ? 'pass' : 'fail'}">${passing ? 'ผ่าน' : 'ไม่ผ่าน'}</td>
           <td>${trend}</td>
+          ${SONGS.map((song) => {
+            const v = getSingingScore(s.id, song.id);
+            return `<td class="num sep">${v === null ? '-' : v}</td>`;
+          }).join('')}
+          <td class="num">${singingComplete(s.id) ? singingTotal(s.id) : '-'}</td>
         </tr>
       `;
     }).join('');
@@ -1048,7 +1122,8 @@
       <p class="hint">
         คะแนนจิตพิสัยสุทธิคำนวณจากค่าเฉลี่ยของทั้ง 4 ครั้ง (แต่ละครั้งเต็ม ${maxTotal()}) แล้วปรับสัดส่วนให้เต็ม 10 คะแนนตามหลักสูตร ·
         ต้องได้ไม่ต่ำกว่า ${FINAL_PASS_SCORE} คะแนนจึงจะถือว่าผ่านเกณฑ์ (ต่ำกว่า ${FINAL_PASS_SCORE} = ไม่ผ่าน) ·
-        ผ่านเกณฑ์ ${passCount}/${state.students.length} คน · แนวโน้มเทียบครั้งที่ 4 กับครั้งที่ 1
+        ผ่านเกณฑ์ ${passCount}/${state.students.length} คน · แนวโน้มเทียบครั้งที่ 4 กับครั้งที่ 1 ·
+        คะแนนสอบร้องเพลง (คอลัมน์ขวาสุด) เป็นคะแนนแยกต่างหาก ไม่รวมกับคะแนนจิตพิสัยสุทธิ
       </p>
       <div class="table-scroll">
         <table class="summary-table">
@@ -1057,6 +1132,8 @@
               <th>เลขที่</th><th>รหัสประจำตัวนักเรียน</th>
               ${OCCASIONS.map((occ) => `<th>ครั้งที่ ${occ}</th>`).join('')}
               <th>คะแนนสุทธิ /10</th><th>ระดับ</th><th>ผล</th><th>แนวโน้ม</th>
+              ${SONGS.map((song) => `<th class="sep">${escapeHtml(song.label)} /${SONG_MAX}</th>`).join('')}
+              <th>รวมร้องเพลง /${SONG_MAX * SONGS.length}</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
@@ -1118,6 +1195,8 @@
       header.push(`ครั้งที่${occ}_บันทึกพฤติกรรม`);
     });
     header.push('คะแนนสุทธิ_เต็ม10', 'ระดับสุทธิ', 'ผลสุทธิ', 'แนวโน้ม');
+    SONGS.forEach((song) => header.push(`ร้องเพลง_${song.label}_เต็ม${SONG_MAX}`));
+    header.push(`รวมร้องเพลง_เต็ม${SONG_MAX * SONGS.length}`);
     const rows = [header];
     sortStudents(state.students).forEach((s) => {
       const row = [s.number, s.code || ''];
@@ -1135,6 +1214,11 @@
       });
       const { finalScore, verdict, passing, trend } = finalSummary(s.id);
       row.push(finalScore.toFixed(1), verdict, passing ? 'ผ่าน' : 'ไม่ผ่าน', trend);
+      SONGS.forEach((song) => {
+        const v = getSingingScore(s.id, song.id);
+        row.push(v === null ? '' : String(v));
+      });
+      row.push(singingComplete(s.id) ? String(singingTotal(s.id)) : '');
       rows.push(row);
     });
     const csv = rows.map((r) => r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\r\n');
