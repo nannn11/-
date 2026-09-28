@@ -245,29 +245,25 @@
     color: var(--muted);
   }
 
-  .roster-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
-    gap: 10px;
-  }
-  .student-card {
-    position: relative;
-    background: var(--paper);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 10px;
-    cursor: pointer;
+  .roster-list {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    transition: border-color 0.15s;
   }
-  .student-card:hover { border-color: var(--accent); }
-  .card-top {
+  .student-row {
+    position: relative;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    transition: border-color 0.15s;
   }
+  .student-row:hover { border-color: var(--accent); }
   .card-number {
     font-variant-numeric: tabular-nums;
     font-weight: 700;
@@ -277,37 +273,31 @@
     padding: 2px 8px;
     border-radius: 999px;
   }
-  .card-name {
+  .row-code {
     font-weight: 600;
     font-size: 0.9rem;
-    line-height: 1.3;
-    min-height: 2.35em;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    flex: 1;
+    min-width: 90px;
   }
-  .card-score-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-  .card-score-value {
-    min-width: 40px;
-    text-align: center;
-    font-size: 1.25rem;
+  .row-badges { display: flex; gap: 4px; font-size: 0.86rem; }
+  .row-score {
+    text-align: right;
+    font-size: 1.05rem;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     color: var(--positive);
   }
-  .card-score-value.mid { color: var(--gold); }
-  .card-score-value.low { color: var(--negative); }
-  .card-bar { width: 100%; height: 5px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
-  .card-bar-fill { height: 100%; border-radius: 999px; background: var(--gold); }
-  .card-of { text-align: center; color: var(--muted); font-size: 0.72rem; }
-  .card-verdict { text-align: center; color: var(--positive); font-size: 0.72rem; font-weight: 600; }
-  .card-verdict.fail { color: var(--negative); }
+  .row-score.mid { color: var(--gold); }
+  .row-score.low { color: var(--negative); }
+  .row-of { color: var(--muted); font-weight: 400; font-size: 0.76rem; }
+  .row-verdict {
+    color: var(--positive);
+    font-size: 0.76rem;
+    font-weight: 600;
+    min-width: 100px;
+    text-align: right;
+  }
+  .row-verdict.fail { color: var(--negative); }
 
   .empty-hint { text-align: center; color: var(--muted); padding: 26px; }
 
@@ -341,6 +331,7 @@
     border: 1px solid var(--line); background: var(--paper); color: var(--ink);
     resize: vertical;
   }
+  .field textarea:disabled { background: var(--surface-2); color: var(--muted); cursor: not-allowed; }
   .hint { font-size: 0.84rem; color: var(--muted); margin: 0 0 12px; }
 
   .field-with-save { margin-bottom: 14px; }
@@ -363,6 +354,9 @@
   }
   .level-btn:hover { background: var(--accent-soft); }
   .level-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .level-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+  .level-btn:disabled:hover { background: var(--surface); }
+  .level-btn.active:disabled:hover { background: var(--accent); }
   .criterion-desc {
     margin: 0; padding: 8px 10px; background: var(--surface-2); border-radius: 0 0 8px 8px;
     border-top: 1px dashed var(--line); font-size: 0.8rem; color: var(--muted);
@@ -481,7 +475,7 @@
         <button type="button" id="btnSavePostTeachingNote" class="btn btn-secondary btn-save-note">💾 บันทึก</button>
       </div>
       <p class="hint">แตะที่กล่องนักเรียนเพื่อปรับคะแนนแต่ละหัวข้อและบันทึกพฤติกรรมของครั้งนี้ (เริ่มต้นเต็ม 5 คะแนนต่อข้อ)</p>
-      <div id="studentRows" class="roster-grid"></div>
+      <div id="studentRows" class="roster-list"></div>
       <p id="noResults" class="empty-hint hidden">ไม่พบนักเรียนที่ค้นหา</p>
     </section>
   </main>
@@ -730,6 +724,12 @@
         state.scores = { ...state.scores, [studentId]: { ...current, occasions: { ...current.occasions, [occasionNum]: { ...occasion, note: text } } } };
         persist(); render();
       },
+      async setOccasionLock(studentId, occasionNum, locked) {
+        const current = state.scores[studentId] || { occasions: {} };
+        const occasion = current.occasions[occasionNum] || { scores: {} };
+        state.scores = { ...state.scores, [studentId]: { ...current, occasions: { ...current.occasions, [occasionNum]: { ...occasion, locked } } } };
+        persist(); render();
+      },
       async setSingingScore(studentId, songId, value) {
         const current = state.scores[studentId] || { occasions: {} };
         const singingExam = { ...(current.singingExam || {}) };
@@ -829,6 +829,12 @@
         const current = state.scores[studentId] || { occasions: {} };
         const occasion = current.occasions[occasionNum] || { scores: {} };
         const newDoc = { ...current, occasions: { ...current.occasions, [occasionNum]: { ...occasion, note: text } } };
+        await scoresCol.doc(studentId).set(newDoc);
+      },
+      async setOccasionLock(studentId, occasionNum, locked) {
+        const current = state.scores[studentId] || { occasions: {} };
+        const occasion = current.occasions[occasionNum] || { scores: {} };
+        const newDoc = { ...current, occasions: { ...current.occasions, [occasionNum]: { ...occasion, locked } } };
         await scoresCol.doc(studentId).set(newDoc);
       },
       async setSingingScore(studentId, songId, value) {
@@ -934,32 +940,28 @@
 
     sorted.forEach((student) => {
       const { total } = occasionSummary(student.id, currentOccasion);
-      const pct = max > 0 ? Math.max(0, Math.min(100, (total / max) * 100)) : 0;
       const tier = verdictFor(total, max);
       const pillClass = verdictTone(tier);
       const passing = isPassing(total, max);
-      const hasNote = !!(state.scores[student.id]?.occasions?.[currentOccasion]?.note);
+      const occasionRec = state.scores[student.id]?.occasions?.[currentOccasion];
+      const hasNote = !!occasionRec?.note;
+      const isLocked = !!occasionRec?.locked;
       const hasSinging = SONGS.some((s) => getSingingResult(student.id, s.id) !== null);
-      const card = document.createElement('div');
-      card.className = 'student-card';
-      card.innerHTML = `
-        <div class="card-top">
-          <span class="card-number">${escapeHtml(student.number)}</span>
-          <span>
-            ${hasNote ? '<span title="มีบันทึกพฤติกรรมครั้งนี้">📝</span>' : ''}
-            ${hasSinging ? `<span class="card-song-badge" title="มีคะแนนสอบร้องเพลงแล้ว">🎵</span>` : ''}
-          </span>
-        </div>
-        <div class="card-name">รหัส ${escapeHtml(student.code || '-')}</div>
-        <div class="card-score-row">
-          <span class="card-score-value ${pillClass}">${total}</span>
-          <span class="card-of">/ ${max}</span>
-        </div>
-        <div class="card-bar"><div class="card-bar-fill" style="width:${pct}%"></div></div>
-        <div class="card-verdict ${passing ? '' : 'fail'}">${tier} · ${passing ? 'ผ่าน' : 'ไม่ผ่าน'}</div>
+      const row = document.createElement('div');
+      row.className = 'student-row';
+      row.innerHTML = `
+        <span class="card-number">${escapeHtml(student.number)}</span>
+        <span class="row-code">รหัส ${escapeHtml(student.code || '-')}</span>
+        <span class="row-badges">
+          ${isLocked ? '<span title="ล็อกข้อมูลครั้งนี้แล้ว">🔒</span>' : ''}
+          ${hasNote ? '<span title="มีบันทึกพฤติกรรมครั้งนี้">📝</span>' : ''}
+          ${hasSinging ? `<span class="card-song-badge" title="มีคะแนนสอบร้องเพลงแล้ว">🎵</span>` : ''}
+        </span>
+        <span class="row-score ${pillClass}">${total}<span class="row-of">/${max}</span></span>
+        <span class="row-verdict ${passing ? '' : 'fail'}">${tier} · ${passing ? 'ผ่าน' : 'ไม่ผ่าน'}</span>
       `;
-      card.addEventListener('click', () => openStudentModal(student.id));
-      studentRowsEl.appendChild(card);
+      row.addEventListener('click', () => openStudentModal(student.id));
+      studentRowsEl.appendChild(row);
     });
   }
 
@@ -984,19 +986,38 @@
     if (!student) return;
     openModal(`เลขที่ ${student.number} · รหัส ${student.code || '-'} · ครั้งที่ ${currentOccasion}`);
     renderStudentModalBody(studentId);
-    modalFooter.innerHTML = `
-      <button type="button" class="btn btn-ghost" data-edit style="margin-right:auto;">✏️ แก้ไขเลขที่-รหัส</button>
-      <button type="button" class="btn btn-ghost" data-close>ปิด</button>
-    `;
-    modalFooter.querySelector('[data-close]').addEventListener('click', closeModal);
-    modalFooter.querySelector('[data-edit]').addEventListener('click', () => openEditStudentModal(studentId));
+    renderStudentModalFooter(studentId);
     modalForm.onsubmit = null;
+  }
+
+  function renderStudentModalFooter(studentId) {
+    const occasionRec = state.scores[studentId]?.occasions?.[currentOccasion] || {};
+    const locked = !!occasionRec.locked;
+    modalFooter.innerHTML = `
+      <button type="button" class="btn btn-ghost" data-edit-info style="margin-right:auto;">✏️ แก้ไขเลขที่-รหัส</button>
+      ${locked
+        ? '<button type="button" class="btn btn-ghost" data-edit-scores>✏️ แก้ไข</button>'
+        : '<button type="button" class="btn btn-primary" data-save>💾 บันทึก</button>'}
+    `;
+    modalFooter.querySelector('[data-edit-info]').addEventListener('click', () => openEditStudentModal(studentId));
+    if (locked) {
+      modalFooter.querySelector('[data-edit-scores]').addEventListener('click', async () => {
+        await backend.setOccasionLock(studentId, currentOccasion, false);
+        if (modal.open) { renderStudentModalBody(studentId); renderStudentModalFooter(studentId); }
+      });
+    } else {
+      modalFooter.querySelector('[data-save]').addEventListener('click', async () => {
+        await backend.setOccasionLock(studentId, currentOccasion, true);
+        closeModal();
+      });
+    }
   }
 
   function renderStudentModalBody(studentId) {
     const occasionRec = state.scores[studentId]?.occasions?.[currentOccasion] || {};
     const rec = occasionRec.scores || {};
     const noteVal = occasionRec.note || '';
+    const locked = !!occasionRec.locked;
     const { total } = occasionSummary(studentId, currentOccasion);
     const max = maxTotal();
     const tier = verdictFor(total, max);
@@ -1009,7 +1030,7 @@
           <div class="criterion-row">
             <span class="criterion-label">${escapeHtml(c.label)}</span>
             <div class="level-buttons">
-              ${LEVELS.map((lv) => `<button type="button" class="level-btn ${val === lv ? 'active' : ''}" data-crit="${c.id}" data-value="${lv}">${lv}</button>`).join('')}
+              ${LEVELS.map((lv) => `<button type="button" class="level-btn ${val === lv ? 'active' : ''}" data-crit="${c.id}" data-value="${lv}" ${locked ? 'disabled' : ''}>${lv}</button>`).join('')}
             </div>
           </div>
           ${desc ? `<p class="criterion-desc">${escapeHtml(String(val))} = ${escapeHtml(desc)}</p>` : ''}
@@ -1020,14 +1041,15 @@
       <div class="score-total-banner">
         คะแนนรวมครั้งที่ ${currentOccasion}: <strong>${total}</strong> / ${max}
         · <strong class="${passing ? '' : 'negative'}">${tier}</strong> (${passing ? 'ผ่าน' : 'ไม่ผ่าน'})
+        ${locked ? ' · 🔒 ล็อกแล้ว' : ''}
       </div>
-      <p class="hint">เริ่มต้นทุกหัวข้อเต็มคะแนน (5) แตะระดับที่ตรงกับพฤติกรรมเพื่อปรับ/หักคะแนน</p>
+      <p class="hint">${locked ? 'ข้อมูลครั้งนี้ถูกล็อกแล้ว กด "✏️ แก้ไข" ด้านล่างเพื่อแก้ไขคะแนนอีกครั้ง' : 'เริ่มต้นทุกหัวข้อเต็มคะแนน (5) แตะระดับที่ตรงกับพฤติกรรมเพื่อปรับ/หักคะแนน'}</p>
       ${state.criteria.length === 0
         ? '<p class="empty-hint">ยังไม่มีหัวข้อประเมิน กดปุ่ม "⚙️ หัวข้อประเมิน" ที่ด้านบนเพื่อเพิ่ม</p>'
         : rows}
       <label class="field" style="margin-top:10px;">
         <span>บันทึกพฤติกรรม (ครั้งที่ ${currentOccasion})</span>
-        <textarea id="f-student-note" rows="3" placeholder="สังเกตพฤติกรรมเพิ่มเติม เหตุการณ์เฉพาะ ฯลฯ">${escapeHtml(noteVal)}</textarea>
+        <textarea id="f-student-note" rows="3" placeholder="สังเกตพฤติกรรมเพิ่มเติม เหตุการณ์เฉพาะ ฯลฯ" ${locked ? 'disabled' : ''}>${escapeHtml(noteVal)}</textarea>
       </label>
       <div class="singing-section">
         <h4 class="singing-heading">🎵 ผลสอบร้องเพลง</h4>
@@ -1055,9 +1077,12 @@
         if (modal.open) renderStudentModalBody(studentId);
       });
     });
-    modalBody.querySelector('#f-student-note').addEventListener('change', async (e) => {
-      await backend.setStudentNote(studentId, currentOccasion, e.target.value);
-    });
+    const noteInput = modalBody.querySelector('#f-student-note');
+    if (!locked) {
+      noteInput.addEventListener('change', async (e) => {
+        await backend.setStudentNote(studentId, currentOccasion, e.target.value);
+      });
+    }
     modalBody.querySelectorAll('.singing-btn').forEach((btn) => {
       btn.addEventListener('click', async () => {
         const songId = btn.dataset.song;
